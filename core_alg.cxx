@@ -1,98 +1,120 @@
+#include <cgv/gui/key_event.h>
+#include <cgv/gui/key_control.h>
+#include <cgv/gui/trigger.h>
+#include <cgv/gui/provider.h>
+#include <cgv/utils/ostream_printf.h>
+#include <cgv/utils/tokenizer.h>
 #include <cgv/render/drawable.h>
+#include <cgv/render/context.h>
 #include <cgv/render/shader_program.h>
 #include <cgv_gl/gl/gl.h>
-#include <cgv/base/register.h>
-#include <cgv/gui/trigger.h>
-#include <cgv/gui/event_handler.h>
-#include <cgv/gui/key_event.h>
-#include <cgv/utils/ostream_printf.h>
-#include <cgv/gui/provider.h>
-#include <cgv/math/ftransform.h>
 #include <cgv/media/illum/surface_material.h>
+#include <cgv/math/ftransform.h>
 
 using namespace cgv::base;
-using namespace cgv::reflect;
-using namespace cgv::gui;
 using namespace cgv::signal;
+using namespace cgv::gui;
+using namespace cgv::math;
 using namespace cgv::render;
+using namespace cgv::utils;
+using namespace cgv::media::illum;
 
-class render_test :
-	public base,    // base class of all to be registered classes
-	public provider, // is derived from tacker, which is not necessary as base anymore
-	public event_handler, // necessary to receive events
-	public drawable // registers for drawing with opengl
+class cube_demo : public node, public drawable, public provider
 {
-private:
-	/// flag used to represent the state of the extensible gui node
-	bool toggle;
-protected:
-	/// whether animation is turned on
-	bool animate;
-	/// rotation angle around y-axis in degrees
 	double angle;
-	/// rotation speed in degrees per second
+	bool animate;
 	double speed;
-	/// recursion depth
-	unsigned int rec_depth;
-	/// resolution of smooth shapes
-	int resolution;
-	///
-	cgv::media::illum::surface_material material;
-	/// different shape types
-	enum Shape { CUBE, PRI, TET, OCT, DOD, ICO, CYL, CONE, DISK, ARROW, SPHERE } shp;
+	double aspect;
+	double s;
+	dvec3  axis;
+	surface_material axes_mat, cube_mat;
 public:
-	/// initialize rotation angle
-	render_test()
+	cube_demo() :
+		axes_mat(BT_OREN_NAYAR, surface_material::color_type(0, 0, 0), 0.2f),
+		cube_mat(BT_OREN_NAYAR, surface_material::color_type(0.6f, 0.5f, 0.4f), 0.5f),
+		axis(1, 0, 0)
 	{
-		connect(get_animation_trigger().shoot, this, &render_test::timer_event);
+		set_name("cube_demo");
+		angle = 0;
+		s = 0.4;
+		aspect = 0.02;
+		animate = false;
+		speed = 3;
+		connect(get_animation_trigger().shoot, this, &cube_demo::timer_event);
 	}
-	/// 
 	void on_set(void* member_ptr)
 	{
 		update_member(member_ptr);
 		post_redraw();
 	}
-	/// self reflection allows to change values in the config file
-	bool self_reflect(reflection_handler& rh)
-	{
-		return true;
-	}
-	/// return the type name of the class derived from base
-	std::string get_type_name() const
-	{
-		return "simple_cube";
-	}
-	/// show statistic information
-	void stream_stats(std::ostream& os)
-	{
-	}
-	/// show help information
-	void stream_help(std::ostream& os)
-	{
-	}
-	/// overload to handle events, return true if event was processed
-	bool handle(event& e)
-	{
-		return true;
-	}
-	/// declare timer_event method to connect the shoot signal of the trigger
-	void timer_event(double, double dt)
-	{
-	}
-	/// setting the view transform yourself
-	void draw(context& ctx)
-	{
-		
-	}
-	/// overload the create gui method
 	void create_gui()
 	{
-		add_decorator("Simple Cube GUI", "heading", "level=1"); // level=1 is default and can be skipped
-		add_member_control(this, "recursion depth", rec_depth, "value_slider", "min=1;max=8;ticks=true");
-		/// use a selection gui element to directly manipulate the shape enum
-		add_member_control(this, "shape", shp, "dropdown", "enums='CUBE,PRI,TET,OCT,DOD,ICO,CYL,CONE,DISK,ARROW,SPHERE'");
+		add_member_control(this, "animate", animate, "check", "shortcut='a'");
+		add_member_control(this, "angle", angle, "value_slider", "min=0;max=360;ticks=true");
+		add_gui("axis", axis, "direction", "options='min=-1;max=1;ticks=true'");
+		add_member_control(this, "speed", speed, "value_slider", "min=0.1;max=100;ticks=true;log=true");
+		add_member_control(this, "scale", s, "value_slider", "min=0.01;max=1;log=true;ticks=true");
+		add_member_control(this, "aspect", aspect, "value_slider", "min=0.01;max=1;ticks=true;log=true");
+	}
+	void timer_event(double, double dt)
+	{
+		if (animate) {
+			angle += speed;
+			if (angle > 360) {
+				angle = 0;
+				animate = false;
+				update_member(&animate);
+			}
+			update_member(&angle);
+			post_redraw();
+		}
+	}
+	void draw_axes(context& ctx, bool transformed)
+	{
+		float c = transformed ? 0.7f : 1;
+		float d = 1 - c;
+		float l = float(axis.length());
+		ctx.set_color(rgb(c, d, d));
+		ctx.tesselate_arrow(fvec<double, 3>(0, 0, 0), fvec<double, 3>(l, 0, 0), aspect);
+		ctx.set_color(rgb(d, c, d));
+		ctx.tesselate_arrow(fvec<double, 3>(0, 0, 0), fvec<double, 3>(0, l, 0), aspect);
+		ctx.set_color(rgb(d, d, c));
+		ctx.tesselate_arrow(fvec<double, 3>(0, 0, 0), fvec<double, 3>(0, 0, l), aspect);
+	}
+	void draw(context& c)
+	{
+		c.push_modelview_matrix();
+
+		c.ref_surface_shader_program().enable(c);
+		c.ref_surface_shader_program().set_uniform(c, "map_color_to_material", 3);
+		c.set_material(axes_mat);
+		draw_axes(c, false);
+		c.set_color(rgb(0.6f, 0.6f, 0.6f));
+		c.tesselate_arrow(fvec<double, 3>(0, 0, 0), axis, aspect);
+		c.mul_modelview_matrix(rotate4<double>(angle, axis));
+		draw_axes(c, true);
+		c.mul_modelview_matrix(scale4<double>(s, s, s) * translate4<double>(1, 1, -1));
+		c.ref_surface_shader_program().disable(c);
+
+		c.ref_default_shader_program().enable(c);
+		c.set_color(rgb(0, 0, 0));
+		glLineWidth(3);
+		c.tesselate_unit_cube(false, true);
+		c.ref_default_shader_program().disable(c);
+
+		c.ref_surface_shader_program().enable(c);
+		c.ref_surface_shader_program().set_uniform(c, "map_color_to_material", 0);
+		glEnable(GL_POLYGON_OFFSET_FILL);
+		glPolygonOffset(1, 0);
+		c.set_material(cube_mat);
+		c.tesselate_unit_cube();
+		glDisable(GL_POLYGON_OFFSET_FILL);
+		c.ref_surface_shader_program().disable(c);
+		c.pop_modelview_matrix();
 	}
 };
 
 #include <cgv/base/register.h>
-cgv::base::object_registration<render_test> render_test_reg("render_test");
+
+/// register a factory to create new cubes
+cgv::base::object_registration<cube_demo> cube_demo_fac("cube_demo");
