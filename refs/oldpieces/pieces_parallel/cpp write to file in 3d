@@ -1,0 +1,32 @@
+bool write2file3d(float ***data,char *filePath,int row,int col , int depth){
+
+	FILE * results = fopen(filePath, "w");
+    for (int k = 0; k < depth; k++) {
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                fprintf(results, "%.6f ", data[k][i][j]);
+            }
+            fprintf(results, "\n");
+        }
+        fprintf(results, "\n\n");
+    }
+	return true ;
+}
+
+---------------------------------array version --------------------------------
+
+bool write2file3d_witharray(float *data,char *filePath,int row,int col ,int depth){
+
+	FILE * results = fopen(filePath, "w");
+    for (int k = 0; k < depth; k++) {
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                fprintf(results, "%.6f ", data[k*row*col+i*col+j]);
+            }
+            fprintf(results, "\n");
+        }
+        fprintf(results, "\n\n");
+    }
+	return true ;
+}
+

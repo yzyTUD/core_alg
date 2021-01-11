@@ -1,0 +1,40 @@
+
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+public class MyCompute {
+    public static void main(String[] args) {
+    	//new-add
+        JFrame jf = new JFrame("计算器"); //创建一个窗口
+        JPanel jp = new JPanel(); //创建
+        JButton jb = new JButton("Click me");
+        final JLabel jl=new JLabel("0");
+        jp.add(jb);
+        jp.add(jl);
+        
+        //logic
+        jb.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+				jl.setText(""+(Integer.parseInt(jl.getText())+1));
+			}
+        });
+        
+        //set
+        jf.add(jp);//将面板放入窗口
+        jf.setSize(800, 800);
+        //jf.pack(); //自动调节大小
+        //jf.setResizable(false);//不能改变窗口的大小
+        jf.setLocation(300,200); // 设置初始的位置
+        jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);//关闭
+        jf.setVisible(true); //解决了初始不可见的问题
+    }
+}

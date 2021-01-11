@@ -1,0 +1,107 @@
+
+#include <iostream>
+#include <stdlib.h>
+#include <GL/glut.h>
+
+using namespace std;
+
+int maze[12][12] =
+{
+    { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ,1,1},
+    { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,1,1}, ///->
+    { 1, 0, 1, 0, 0, 0, 0, 1, 1, 1 ,1,1},
+    { 1, 0, 0, 1, 1, 0, 0, 1, 1, 1 ,1,1},
+    { 1, 0, 0, 1, 1, 0, 0, 1, 1, 1 ,1,1},
+    { 1, 0, 0, 0, 0, 0, 0, 1, 1, 1 ,1,1},
+    { 1, 0, 0, 0, 0, 0, 0, 1, 1, 1 ,1,1},
+    { 1, 0, 1, 1, 1, 1, 0, 0, 0, 0 ,1,1},
+    { 1, 0, 1, 1, 1, 1, 0, 0, 0, 1 ,1,1},
+    { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ,1,1},
+        { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ,1,1},
+        { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ,1,1}
+};
+
+void handleResize(int w, int h) {
+    glViewport(0, 0, w, h);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0, 30, 0, 30, -14, 14);
+}
+
+void drawScene() {
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+         float bk=2.0/13;
+
+         for(int i=0;i<12;i++){
+                 for(int j=0;j<12;j++){
+                glPushMatrix();
+                        glTranslatef((i+1)*(2+bk),28-(j+1)*(2+bk),0);
+                                glBegin(GL_QUADS);
+                                 if(maze[i][j]==1){
+                                        glColor3f(0, 1, 0);
+                                } else{
+                                        glColor3f(1, 1, 1);
+                                }
+                                                glVertex3f(0, 0, 0);
+                                                glVertex3f(2, 0, 0);
+                                                glVertex3f(2, 2, 0);
+                                                glVertex3f(0, 2, 0);
+                                glEnd();
+                        glPopMatrix();
+                }
+        }
+
+    glutSwapBuffers();
+
+}
+
+void mouseCB(int button, int state, int x, int y)
+{
+
+    if(button == GLUT_LEFT_BUTTON)
+    {
+        if(state == GLUT_DOWN)
+        {
+
+                 if(x-28.5>0){
+                         if(maze[(int )(x/28.5)-1][(int)(y/28.5)-1]==1)
+                                maze[( int)(x/28.5)-1][(int )(y/28.5)-1]=0;
+                         else
+                                maze[( int)(x/28.5)-1][(int )(y/28.5)-1]=1;
+
+                }
+
+            //mouseLeftDown = true;
+        }
+        else if (state == GLUT_UP)
+                        drawScene();
+            //mouseLeftDown = false;
+    }
+
+    else if (button == GLUT_RIGHT_BUTTON)
+    {
+        if(state == GLUT_DOWN)
+        {
+            //mouseRightDown = true;
+        }
+       // else if(state == GLUT_UP)
+            //mouseRightDown = false;
+    }
+}
+
+int main(int argc, char** argv) {
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitWindowSize(400, 400);
+    glutCreateWindow( "地图编辑器");
+        glutMouseFunc(mouseCB);
+    glutDisplayFunc(drawScene);
+    glutReshapeFunc(handleResize);
+    glutMainLoop();
+    return 0;
+}
+

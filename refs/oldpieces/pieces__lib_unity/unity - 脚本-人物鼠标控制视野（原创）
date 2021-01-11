@@ -1,0 +1,67 @@
+using UnityEngine;
+using System.Collections;
+
+public class Script_07_11 : MonoBehaviour 
+{
+
+	
+	//摄像机参照的模型
+	public Transform target;
+
+    public bool st=false;
+	
+	//摄像机距离默认的距离
+	public float distance = 20.0f;
+	
+	//鼠标X轴、Y轴移动的角度
+	float x;
+	float y;
+	
+	//限制旋转角度的最小值与最大值
+	float yMinLimit = -20.0f;
+	float yMaxLimit = 80.0f;
+	
+	//X、Y轴移动速度
+	float xSpeed = 250.0f;
+	float ySpeed = 120.0f;
+	
+	void Start () 
+	{
+		//初始化X、Y轴角度等于参照模型的角度
+		Vector2 angles = transform.eulerAngles;
+    	x = angles.y;
+    	y = angles.x;
+
+   		if (rigidbody)
+			rigidbody.freezeRotation = true;
+	}
+	
+	
+	void LateUpdate () 
+	{
+        if (Input.GetMouseButtonDown(1))
+            st = !st;
+     
+       if (target&&!st) 
+       {	
+       		//根据鼠标移动修改相机的角度
+    	    x += Input.GetAxis("Mouse X") * xSpeed * 0.02f;
+       		y -= Input.GetAxis("Mouse Y") * ySpeed * 0.02f;
+ 			y = ClampAngle(y, yMinLimit, yMaxLimit);
+        	Quaternion rotation = Quaternion.Euler(y, x, 0);
+        	//Vector3 position = rotation * new Vector3(0.0f, 0.0f, -distance)+ target.position;
+        	//设置模型的位置与旋转
+       		transform.rotation = rotation;
+        	//transform.position = position;
+    	}
+	}
+	
+	float ClampAngle (float angle , float min , float max)
+	{
+		if (angle < -360)
+			angle += 360;
+		if (angle > 360)
+			angle -= 360;
+		return Mathf.Clamp (angle, min, max);
+	}
+}

@@ -1,0 +1,26 @@
+
+    what about?
+        vr? -- everything in vr 
+        math/phy? -- in omi. more compact! 
+    * what's gonna included?
+        anim 
+            Skinning
+                Daul Quaternion blending 
+            IK 
+                basic CCD  
+        modeling 
+            mesh processing 
+                smoothing 
+                triangulation 
+            mesh checking 
+                ...
+        render
+            basic renderer
+                texture coordinates computation 
+            realistic renderer 
+                gi based photon mapping in vr 
+
+        simulation 
+            fluid
+        vis 
+            trijectory vis 

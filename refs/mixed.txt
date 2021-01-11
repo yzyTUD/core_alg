@@ -1,0 +1,71 @@
+
+    //
+        muster:
+        task: using xxx
+            clear_objective:
+            bkg_knowledge:
+            understand_the_framework:(learn about the fw)
+            code design:
+            real_coding:
+            core_extraction:(to zrlib_xxx.h)
+            documentation:(screenshots, videos...)
+    
+    zrlib_math.h:
+        task: using sobel operator -- zrlib_math.h 
+            clear_objective:
+            bkg_knowledge:
+                online-https://blog.csdn.net/qq_29540745/article/details/51918004
+                    灰度或结构等信息的突变处，边缘是一个区域的结束，也是另一个区域的开始，利用该特征可以分割图像。
+                    边缘点：图像中具有坐标[x，y]，且处在强度显著变化的位置上的点。
+                    边缘段：对应于边缘点坐标[x，y]及其方位 ，边缘的方位可能是梯度角。
+                    索贝尔算子（Sobeloperator）主要用作边缘检测，在技术上，它是一离散性差分算子
+                    req- 使用f函数stencil运算，使用不开平方的近似值
+                    对噪声具有平滑作用，提供较为精确的边缘方向信息，边缘定位精度不够高。    
+                        当对精度要求不是很高时，是一种较为常用的边缘检测方法。
+                online-https://www.meccanismocomplesso.org/en/opencv-python-edge-detection-and-image-gradient-analysis/
+                    The kernel with size 3 is the simplest case:
+                    Unfortunately the partial derivatives can not be solved analytically but must be treated with the numerical calculation using approximations.
+                    horizontal derivative of Sobal (Sobal x)
+                    The Scharr function has these two kernels:
+                    The diagonal lines are visible in both cases since they have both horizontal and vertical components
+                    Combining the two filters (the calculation of two derivatives) to obtain the Laplacian filter
+                    the determination of the edges is omnidirectional but has some loss of resolution.
+                    The angle of orientation of the edge (relative to the pixel grid) giving rise to the spatial gradient is given by:
+                    *** opencv at function takes (y,x) coordinates, so the order is correct in the code. 
+                    
+                book-
+                paper-
+            understand_the_framework:(learn about the fw)
+                whichfw-cgv 
+                    modified, the ... has been changed 
+                    ...
+            code design:
+                使用f函数stencil运算，使用不开平方的近似值
+                看要用在什么场合，如果要求速度就不能做太复杂运算
+                take a look at opencv imp. 
+                    
+            real_coding:
+            core_extraction(to zrlib_xxx.h)
+            documentation(screenshots, videos...)
+
+        task: using himino benchmark 
+            clear_objective:
+            bkg_knowledge:
+            understand_the_framework:(learn about the fw)
+            code design:
+            real_coding:
+            core_extraction:(to zrlib_xxx.h)
+            documentation:(screenshots, videos...)
+
+        task: using bilateral filter 
+
+        task: FFT
+
+    zrlib_logic.h:
+        taks using diff. stru. merge codes before 
+
+
+    
+
+
+        

@@ -1,0 +1,123 @@
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+class TreeNode
+    {
+        public TreeNode leftNode;
+        public TreeNode rightNode;
+        public int data;
+        public String code;
+        public TreeNode(int data)
+            {
+                this.code="";
+                this.data=data;
+            }
+    }
+
+public class Huffman
+    {
+        /*
+         * 设S={A,B,C,D,E,F},W={2,3,5,7,9,12}
+         */
+        static HashMap map;
+        static HashMap<Integer,String> codeMap=new HashMap<Integer,String>();
+        public Huffman(){}
+
+        public static void main(String[] args)
+        {
+                Character[] character = { 'A', 'B', 'C', 'D', 'E', 'F' };
+                int[] weight = { 2, 3, 5, 7, 9, 12 };// 有序或者无序都一样
+                map=new HashMap();
+                for(int i=0;i<weight.length;i++){
+                    map.put(character[i], weight[i]);
+                }
+                ArrayList<TreeNode> nodes = new ArrayList<TreeNode>();
+                for (int i = 0; i < weight.length; i++)
+                    {
+                        nodes.add(new TreeNode(weight[i]));
+                    }
+                while (true)
+                    {
+                        if (nodes.size() <= 1)
+                            break;
+                        // 找两个最小的
+                        TreeNode minNode = nodes.get(0);
+                        TreeNode sminNode = nodes.get(1);
+                        for (int i = 1; i < nodes.size(); i++)
+                            {
+                                TreeNode tempNode = nodes.get(i);
+                                if (minNode.data >=tempNode.data)
+                                    {
+                                        sminNode = minNode;
+                                        minNode = tempNode;
+                                    }
+                            }
+                        nodes.remove(minNode);
+                        nodes.remove(sminNode);
+                        TreeNode newNode = new TreeNode(
+                                minNode.data + sminNode.data);
+                        newNode.leftNode = minNode;
+                        newNode.rightNode = sminNode;
+                        nodes.add(newNode);
+                    }
+                TreeNode hafmanTreeNode=nodes.get(0);
+                //HashMap<Integer, String> codeMap=
+                        HuffmanCoding(hafmanTreeNode,"");
+
+        }
+
+        //静态方法，递归遍历得到哈夫曼编码
+          public static HashMap<Integer, String> HuffmanCoding(TreeNode hfm,String code){
+                //如果左子树不为空，则左子树编码加0
+                if(hfm.leftNode!=null){
+                    HuffmanCoding(hfm.leftNode,code+"0");  //code在递归中累计 ，用于统计编码
+                }
+                //如果右子树不为空，则右子树编码加1
+                if(hfm.rightNode!=null){
+                    HuffmanCoding(hfm.rightNode,code+"1");
+                }
+                //如果到达叶子结点，则将元素放入HashMap中生成哈弗曼编码表
+                if(hfm.leftNode==null&&hfm.rightNode==null){
+                    codeMap.put(hfm.data,code);
+                    System.out.println(getCharacter(hfm.data)+":"+code);
+                    hfm.code=code;
+                }
+                return codeMap;
+            }
+
+         //静态方法，用于得到某一个字符的编码
+         public static void getHalmanCode(TreeNode hafmanTreeNode,Character character)
+         {
+             if(hafmanTreeNode==null)
+                 return;
+             if(hafmanTreeNode.leftNode==null&&hafmanTreeNode.rightNode==null)
+                 {
+                     if (getCharacter(hafmanTreeNode.data)==character)
+                        {
+                            System.out.print("");
+                        }
+                 }
+         }
+         //静态方法，用于得到权值对应的字符
+         public static Character getCharacter(int weight)
+         {
+             Integer wgt=weight;
+             Set set=map.entrySet();
+             for(Iterator<TreeNode> iterator=set.iterator();iterator.hasNext();)
+                 {
+                     Map.Entry entry=(Map.Entry) iterator.next();
+                     if(entry.getValue()==wgt)
+                         {
+                             map.remove(entry.getKey());
+                             return (Character) entry.getKey();
+                         }
+                 }
+             return null;
+         }
+    }
+

@@ -1,0 +1,121 @@
+#include <windows.h>
+class ScreenShoter {
+	void echo(CHAR *str)
+	{
+		MessageBox(NULL, str, NULL, MB_OK);
+	}
+
+	//https://lellansin.wordpress.com/2014/03/16/c-gdi-%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE/
+	int CaptureImage(HWND hwnd, CHAR *dirPath, CHAR *filename)
+	{
+		HANDLE hDIB;
+		HANDLE hFile;
+		DWORD dwBmpSize;
+		DWORD dwSizeofDIB;
+		DWORD dwBytesWritten;
+		CHAR FilePath[MAX_PATH];
+		HBITMAP hbmScreen = NULL;
+		BITMAP bmpScreen;
+		BITMAPFILEHEADER bmfHeader;
+		BITMAPINFOHEADER bi;
+		CHAR *lpbitmap;
+		INT width = GetSystemMetrics(SM_CXSCREEN);  
+		INT height = GetSystemMetrics(SM_CYSCREEN);  
+		HDC hdcScreen = GetDC(NULL);
+		HDC hdcMemDC = CreateCompatibleDC(hdcScreen); 
+
+		if (!hdcMemDC)
+		{
+			echo(TEXT("CreateCompatibleDC has failed"));
+			goto done;
+		}
+
+		hbmScreen = CreateCompatibleBitmap(hdcScreen, width, height);
+
+		if (!hbmScreen)
+		{
+			echo(TEXT("CreateCompatibleBitmap Failed"));
+			goto done;
+		}
+
+		SelectObject(hdcMemDC, hbmScreen);
+		if (!BitBlt(
+			hdcMemDC,    
+			0, 0,        
+			width, height, 
+			hdcScreen,   
+			0, 0,       
+			SRCCOPY))   
+		{
+			echo(TEXT("BitBlt has failed"));
+			goto done;
+		}
+
+		GetObject(hbmScreen, sizeof(BITMAP), &bmpScreen);
+
+		bi.biSize = sizeof(BITMAPINFOHEADER);
+		bi.biWidth = bmpScreen.bmWidth;
+		bi.biHeight = bmpScreen.bmHeight;
+		bi.biPlanes = 1;
+		bi.biBitCount = 32;
+		bi.biCompression = BI_RGB;
+		bi.biSizeImage = 0;
+		bi.biXPelsPerMeter = 0;
+		bi.biYPelsPerMeter = 0;
+		bi.biClrUsed = 0;
+		bi.biClrImportant = 0;
+
+		dwBmpSize = ((bmpScreen.bmWidth * bi.biBitCount + 31) / 32) * 4 * bmpScreen.bmHeight;
+
+		hDIB = GlobalAlloc(GHND, dwBmpSize);
+		lpbitmap = (char *)GlobalLock(hDIB);
+
+		GetDIBits(
+			hdcScreen, 
+			hbmScreen, 
+			0,         
+			(UINT)bmpScreen.bmHeight, 
+			lpbitmap,   
+			(BITMAPINFO *)&bi, 
+			DIB_RGB_COLORS 
+		);
+
+
+		wsprintf(FilePath, "%s\%s.bmp", dirPath, filename);
+
+		hFile = CreateFile(
+			FilePath,
+			GENERIC_WRITE,
+			0,
+			NULL,
+			CREATE_ALWAYS,
+			FILE_ATTRIBUTE_NORMAL,
+			NULL
+		);
+		dwSizeofDIB = dwBmpSize + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+		bmfHeader.bfOffBits = (DWORD)sizeof(BITMAPFILEHEADER) + (DWORD)sizeof(BITMAPINFOHEADER);
+		bmfHeader.bfSize = dwSizeofDIB;
+		bmfHeader.bfType = 0x4D42; 
+
+		dwBytesWritten = 0;
+		WriteFile(hFile, (LPSTR)&bmfHeader, sizeof(BITMAPFILEHEADER), &dwBytesWritten, NULL);
+		WriteFile(hFile, (LPSTR)&bi, sizeof(BITMAPINFOHEADER), &dwBytesWritten, NULL);
+		WriteFile(hFile, (LPSTR)lpbitmap, dwBmpSize, &dwBytesWritten, NULL);
+
+		GlobalUnlock(hDIB);
+		GlobalFree(hDIB);
+		CloseHandle(hFile);
+		done:
+			DeleteObject(hbmScreen);
+			DeleteObject(hdcMemDC);
+			ReleaseDC(NULL, hdcScreen);
+
+		return 0;
+	}
+public:
+	int take()
+	{
+		CaptureImage(GetDesktopWindow(),"c:/texs/","sc");
+		return 0;
+	}
+};

@@ -1,0 +1,33 @@
+# -*- coding: utf-8 -*
+import os
+
+
+
+array2D = []
+with open("labeled_city_132026833718152502.txt", "r") as f:
+	for line in f.readlines():
+		array2D.append(line.split(' '))
+#print(array2D)
+print(len(array2D))
+print(len(array2D[0]))
+
+
+index2D = []
+for i in range(0,1023):
+    for j in range(0,1024):
+        #print(array2D[i][j])
+        if(float(array2D[i][j])==0):
+            #print(array2D[i][j])
+            print("zero number found!")
+            index2D.append([i, j])
+#print(index2D)
+
+
+# for x in array2D:
+# 	for y in x:
+# 		if(y==0):
+# 			print("there is some zero numbers")
+
+for item in index2D:
+	print(item)
+        

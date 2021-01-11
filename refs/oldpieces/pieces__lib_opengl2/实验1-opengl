@@ -1,0 +1,273 @@
+
+#include <GL/glut.h>
+#include <GL/gl.h>
+
+#include <math.h>
+#include <vector>
+#include <stdio.h>
+#include <stdlib.h>
+#include <iostream>
+using namespace std;
+
+#define PI 3.1415926
+#define w 500
+#define h 500
+
+typedef struct Point3f
+{
+                 GLfloat x ;
+                 GLfloat y ;
+                 GLfloat z ;
+} point3f;
+
+double c = PI / 180.0;
+double radius = 10.0 , radius1 = 5.0;
+double angle = 10.0 , angle1 = -5.0;
+int shape = 5 ;
+double flag = false , wheel = true;
+vector <point3f> center, top, bottom;
+point3f p;
+
+void myinit( void);
+void getpoints( double r);
+void drawball( double r);
+
+void myinit( void)
+{
+                 glViewport(0 , 0 , w , h );
+                 glMatrixMode(GL_PROJECTION );
+                 glLoadIdentity ();
+
+                 glClearColor(0.8 , 0.8 , 0.8 , 0.8 );
+                 glLoadIdentity ();
+                 glMatrixMode(GL_MODELVIEW );
+                 glLoadIdentity ();
+                 glClear(GL_COLOR_BUFFER_BIT );
+                 getpoints(radius );
+}
+void getpoints( double r )
+{
+
+                 center.clear (); top .clear(); bottom. clear();
+                 double phi , phir , phirn , theta , thetar ;
+                 for ( phi = -80.0 ; phi <= 80.0; phi += 10)
+                 {
+                                 phir = c* phi;
+                                 phirn = c*( phi + 10);
+                                 for ( theta = 0; theta <= 360 ; theta += 10)
+                                 {
+                                                 thetar = c* theta;
+                                                 p.x = sin(thetar )*cos( phir)*r ;
+                                                 p.y = cos(thetar )*cos( phir)*r ;
+                                                 p.z = sin(phir )*r;
+                                                 center.push_back (p);
+                                                 p.x = sin(thetar )*cos( phirn)*r ;
+                                                 p.y = cos(thetar )*cos( phirn)*r ;
+                                                 p.z = sin(phirn )*r;
+                                                 center.push_back (p);
+                                 }
+                 }
+
+                 p.x = 0; p.y = 0; p.z = r;
+                 top.push_back (p);
+                 phir = c * 80 ;
+                 double z = sin(phir )*r;
+                 p.z = z;
+                 for ( theta = 0; theta <= 360 ; theta += 10)
+                 {
+                                 thetar = c* theta;
+                                 p.x = sin(thetar )*cos( phir)*r ;
+                                 p.y = cos(thetar )*cos( phir)*r ;
+                                 top.push_back (p);
+                 }
+
+                 p.x = 0; p.y = 0; p.z = -r;
+                 bottom.push_back (p);
+                 z = -z ;
+                 p.z = z;
+                 for ( theta = 0; theta <= 360 ; theta += 10)
+                 {
+                                 thetar = c* theta;
+                                 p.x = sin(thetar )*cos( phir)*r ;
+                                 p.y = cos(thetar )*cos( phir)*r ;
+                                 bottom.push_back (p);
+                 }
+
+}
+void drawball( double r )
+{
+                 glPolygonMode(GL_FRONT , GL_LINE );
+                 glPolygonMode(GL_BACK , GL_LINE );
+                 glFrontFace(GL_CCW ); //逆时针为正面x
+                 switch ( shape)
+                 {
+                 case 0 :
+                                 glBegin(GL_POINTS );         break;
+                 case 1 :
+                                 glBegin(GL_LINES );             break;
+                 case 2 :
+                                 glBegin(GL_LINE_STRIP );                 break;
+                 case 3 :
+                                 glBegin(GL_LINE_LOOP );  break ;
+                 case 4 :
+                                 glBegin(GL_TRIANGLES );                 break;
+                 case 5 :
+                                 glBegin(GL_TRIANGLE_STRIP );      break;
+                 case 6 :
+                                 glBegin(GL_TRIANGLE_FAN );         break;
+                 case 7 :
+                                 glBegin(GL_QUADS );         break;
+                 case 8 :
+                                 glBegin(GL_QUAD_STRIP );              break;
+                 case 9 :
+                                 glBegin(GL_POLYGON );     break;
+                 }
+
+                 int i ;
+                 for ( i = 0; i< center.size (); i ++)
+                                 glVertex3d(center .at( i).x , center .at( i).y , center .at( i).z );
+                 glEnd();
+
+                 glBegin(GL_TRIANGLE_FAN );
+                 for ( i = 0; i< top.size (); i ++)
+                                 glVertex3d(top .at( i).x , top .at( i).y , top .at( i).z );
+                 glEnd();
+
+                 glBegin(GL_TRIANGLE_FAN );
+                 for ( i = 0; i< bottom.size (); i ++)
+                                 glVertex3d(bottom .at( i).x , bottom .at( i).y , bottom .at( i).z );
+                 glEnd();
+
+}
+void display( void)
+{
+                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+                 glMatrixMode(GL_MODELVIEW );
+                 glLoadIdentity ();
+
+                 glTranslated(0 , 0 , - 30);
+                 glRotated(90 , 1 , 0 , 0 );
+                 glRotated(angle , 1 , 0 , 0 );
+                 glColor3f(1.0f , 0.0f , 0.0f );
+
+                 if ( flag)
+                                 getpoints(radius );
+                 drawball(radius );
+
+                 if ( flag)
+                 {
+                                 glTranslated(10 , 10 , 0 );
+                                 radius1 = 5.0;
+                                 glRotated(-60 , 1 , 1 , 1 );
+                                 glRotated(angle1 , 0 , 1 , 0 );
+                                 glColor3f(0.0f , 1.0f , 0.0f );
+                                 getpoints(radius1 );
+                                 drawball(radius1 );
+                 }
+
+                 glFlush();
+                 glutSwapBuffers ();
+                 printf("The last finish time is :%d\n ms" ,glutGet( GLUT_ELAPSED_TIME ));
+}
+void glutResize( int width , int height)
+{
+                 glViewport(0 , 0 , width , height );
+                 glMatrixMode(GL_PROJECTION );
+                 glLoadIdentity ();
+                 gluPerspective (60, (float )width / ( float)height , 0.1 , 800.0 );
+                 glMatrixMode(GL_MODELVIEW );
+                 glLoadIdentity ();
+
+}
+void mouseEvent( int btn , int state, int x, int y )
+{
+
+                 if ( btn == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+                 {
+                                 { radius = radius + 1.0; getpoints( radius); }
+                 }
+}
+void PopMenu( int id )
+{
+
+                 switch ( id)
+                 {
+
+                 case 0 :
+                 { radius = radius - 1.0; getpoints( radius); }
+                                 break;
+                 case 1 :
+                 {radius = radius + 1.0; getpoints(radius ); }
+                                 break;
+                 case 2 :
+                                 if ( flag){ flag = false; getpoints( radius); }
+                                 else flag = true;
+                                 break;
+                 case 3 :
+                                 if ( wheel)wheel = false;
+                                 else wheel = true;
+                                 break;
+                 case 4 :
+                                 exit(0 );
+                                 break;
+                 }
+
+}
+void ModelMenu( int id )
+{
+                 shape = id;
+}
+void idle( void)
+{
+                 if ( wheel)
+                 {
+                                 angle += 0.1;
+                                 if ( flag)
+                                                 angle1 -= 2;
+                                 glutPostRedisplay ();
+                 }
+
+}
+void main( int argc , char ** argv )
+{
+                 glutInit(&argc , argv );
+                 glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB );
+                 glutInitWindowSize (w, h);
+                 glutInitWindowPosition (200, 200);
+
+                 glutCreateWindow ("图形学实验一");
+
+                 int sub_menu = glutCreateMenu (ModelMenu);
+                 glutAddMenuEntry ("GL_POINTS", 0);
+                 glutAddMenuEntry ("GL_LINES", 1);
+                 glutAddMenuEntry ("GL_LINE_STRIP", 2);
+                 glutAddMenuEntry ("GL_LINE_LOOP", 3);
+                 glutAddMenuEntry ("GL_TRIANGLES", 4);
+                 glutAddMenuEntry ("GL_TRIANGLE_STRIP", 5);
+                 glutAddMenuEntry ("GL_TRIANGLE_FAN", 6);
+                 glutAddMenuEntry ("GL_QUADS", 7);
+                 glutAddMenuEntry ("GL_QUAD_STRIP", 8);
+                 glutAddMenuEntry ("GL_POLYGON", 9);
+
+                 glutCreateMenu (PopMenu);
+                 glutAddSubMenu ("球的样式", sub_menu);
+                 glutAddMenuEntry ("减小球的体积", 0);
+                 glutAddMenuEntry ("增大球的体积", 1);
+                 glutAddMenuEntry ("一个或两个球", 2);
+                 glutAddMenuEntry ("开始或停止旋转" , 3 );
+                 glutAddMenuEntry ("退出", 4);
+                 glutAttachMenu (GLUT_RIGHT_BUTTON);
+
+                 myinit();
+
+                 glutMouseFunc(mouseEvent );
+                 glutReshapeFunc (glutResize);
+                 glutDisplayFunc (display);
+                 //glEnable(GL_DEPTH_TEST);
+                 glutIdleFunc(idle );
+                 glutMainLoop();
+
+}
+
+

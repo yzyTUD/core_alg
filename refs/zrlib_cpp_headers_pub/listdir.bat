@@ -1,0 +1,2 @@
+python listdirnaems.py
+PAUSE

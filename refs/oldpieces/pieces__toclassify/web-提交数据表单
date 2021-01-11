@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>菜鸟教程(runoob.com)</title>
+</head>
+<body>
+<form action="HelloForm" method="POST" id="usrform">
+
+编号：<input type="text" name="id"><br />
+人名：<input type="text" name="name"><br />
+领域：<input type="text" name="spec"><br />
+项目：<input type="text" name="project"><br />
+文章：<input type="text" name="paper"><br />
+联系方式：<input type="text" name="tele"/><br />
+<br />
+中文简介：<br /><textarea rows="4" cols="50" name="intro-ch" form="usrform"></textarea><br />
+英文简介：<br /><textarea rows="4" cols="50" name="intro-en" form="usrform"></textarea><br />
+德语简介：<br /><textarea rows="4" cols="50" name="intro-de" form="usrform"></textarea><br />
+俄语简介：<br /><textarea rows="4" cols="50" name="intro-ru" form="usrform"></textarea><br />
+
+<input type="submit" value="提交" />
+</form>
+</body>
+</html>

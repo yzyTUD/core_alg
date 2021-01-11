@@ -1,0 +1,14 @@
+
+\documentclass{article}
+
+\usepackage{amsmath}
+
+\begin{document}
+can be expressed as follows :
+$\left[
+\begin{matrix}
+1 & 0\\
+0 & 1
+\end{matrix}
+\right]$
+\end{document}

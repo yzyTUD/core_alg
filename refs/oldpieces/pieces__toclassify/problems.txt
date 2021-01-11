@@ -1,0 +1,24 @@
+
+    p::load and show image should be saprated
+        lasy load !
+    f::load static test ok!
+    p::can not dynamic load window!!??
+    p::process bar! used in draw function , so , can not be del. imm.!
+    f::when clean up gui , from end to start 
+    p::can not bind with raw image variable ! Image class needed ! ref to tonemap
+    f::may not show , just use the selection method without gui is ALSO acceptable!
+    	gui should be changed this way . select method + open file 
+    p::null pointer ?? debug!! use set / get function for classes 
+    f::shared member? GLTexture object (just a ref based on name , data is sticked later!)
+	GLTexture* texture(Image show)/FILE * filepointer (File processor)/
+    p::texture and data should in a pair?? a bug??
+
+    next steps?
+	load texture from file/2darr
+	share 2d array for image process, see stbi_load
+		+hdr image processing 
+		+segmentation (png)
+		+medical imaging fMRI support
+	share file pointer 
+		+decide number of lines in a file
+		+file size 

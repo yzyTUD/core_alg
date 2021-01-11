@@ -1,0 +1,49 @@
+package testjava;
+
+import java.io.IOException;
+import java.util.Scanner;
+import java.sql.*;
+
+public class TestJava {
+	// JDBC 驱动名及数据库 URL
+    static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";  
+    static final String DB_URL = "jdbc:mysql://localhost:3306/roominfo";
+    
+ // 数据库的用户名与密码，需要根据自己的设置
+    static final String USER = "root";
+    static final String PASS = "root";
+    
+   
+	public static void main(String args[]) throws IOException, ClassNotFoundException, SQLException{
+		
+		 Connection conn = null;
+		 Statement stmt = null;
+		    
+		// 注册 JDBC 驱动
+        Class.forName("com.mysql.jdbc.Driver");
+    
+        // 打开链接
+        System.out.println("连接数据库...");
+        conn = DriverManager.getConnection(DB_URL,USER,PASS);
+        
+     // 执行查询
+        System.out.println(" 实例化Statement对象...");
+        stmt = conn.createStatement();
+        String sql;
+        sql = "SELECT * FROM users";
+        ResultSet rs = stmt.executeQuery(sql);
+        
+        while(rs.next()){
+            // 通过字段检索
+        	String usrname  = rs.getString("usrname");
+            String password = rs.getString("password");
+            String address = rs.getString("address");
+
+            // 输出数据
+            System.out.print("姓名: " + usrname);
+            System.out.print(", 密码: " + password);
+            System.out.print(", 住址: " + address);
+            System.out.print("\n");
+        }
+	}
+}

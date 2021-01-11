@@ -1,0 +1,426 @@
+
+#include <stdio.h>
+#include <malloc.h>
+#define MaxVerNum 100 /*最大顶点数为100 三种数据结构*/
+typedef char VertexType;
+bool visited[MaxVerNum];
+
+typedef struct node{ /*边表结点*/
+    int    adjvex; /*邻接点域*/
+    struct node * next; /*指向下一个邻接点的指针域*/
+    /*若要表示边上信息，则应增加一个数据域info*/
+}EdgeNode;
+
+typedef struct vnode{ /*顶点表结点 左侧数组*/
+    VertexType vertex; /*顶点域*/
+    EdgeNode * firstedge; /*边表头指针*/
+}VertexNode;
+typedef VertexNode AdjList[MaxVerNum]; /*AdjList 是邻接表类型*/
+
+typedef struct{
+    AdjList adjlist; /*邻接表*/
+    int n, e; /*顶点数和边数*/
+}ALGraph; /*ALGraph 是以邻接表方式存储的图类型*/
+
+void CreateALGraph(ALGraph *G)
+{/*建立有向图的邻接表存储*/
+
+    G->n = 3;
+    G->e = 2;
+
+    G->adjlist[0].vertex = 'a';
+    G->adjlist[1].vertex = 'b';
+    G->adjlist[2].vertex = 'c';
+
+    for (int i = 0; i < G->n;i++)
+        G->adjlist[i].firstedge = NULL;
+
+    EdgeNode* s = (EdgeNode*)malloc(sizeof(EdgeNode)); /*生成新边表结点s*/
+    s->adjvex = 1;
+    s->next = G->adjlist[0].firstedge;
+    G->adjlist[0].firstedge = s;
+
+    s = (EdgeNode*)malloc(sizeof(EdgeNode));
+    s->adjvex = 2;
+    s->next = G->adjlist[0].firstedge;
+    G->adjlist[0].firstedge = s;
+
+}/*CreateALGraph*/
+
+void DFSAL(ALGraph *G, int i)
+{/*以Vi 为出发点对邻接表存储的图G 进行DFS 搜索*/
+    EdgeNode *p;
+    printf("visit:%c\n", G->adjlist[i].vertex);/*访问顶点Vi*/
+    visited[i] = true; /*标记Vi 已访问*/
+    p = G->adjlist[i].firstedge; /*取Vi 边表的头指针*/
+    while (p) /*依次搜索Vi 的邻接点Vj，j=p->adjva*/
+    {
+        if (!visited[p->adjvex]) /*若Vj 尚未访问，则以Vj 为出发点向纵深搜索*/
+            DFSAL(G, p->adjvex);
+        p = p->next; /*找Vi 的下一个邻接点*/
+    }
+}/*DFSAL*/
+
+void DFSTraverseAL(ALGraph *G)
+{/*深度优先遍历以邻接表存储的图G*/
+    int i;
+    for (i = 0; i<G->n; i++)
+        visited[i] = false; /*标志向量初始化*/
+    for (i = 0; i<G->n; i++)
+    if (!visited[i]){
+        printf("----\n");
+        DFSAL(G, i); /*vi 未访问过，从vi 开始DFS 搜索*/
+    }
+
+}/*DFSTraveseAL*/
+
+void show(ALGraph *G){
+    for (int i = 0; i < G->n; i++){
+        EdgeNode* e = G->adjlist[i].firstedge;
+        while (e != NULL){
+            printf("%c ",G->adjlist[e->adjvex]);
+            e = e->next;
+        }
+        printf("\n");
+    }
+}
+
+int main(){
+    ALGraph *G = (ALGraph*)malloc(sizeof(ALGraph));;
+    CreateALGraph(G);
+    show(G);
+    DFSTraverseAL(G);
+    getchar();
+    getchar();
+    return 0;
+}
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+/*
+邻接表的结构：
+     边表
+     顶点表
+     邻接表
+
+     +->+->+->NULL
+     +->NULL
+     +->
+
+*/
+
+/************************************************************************/
+/* 图的邻接表存储结构                                                    */
+/************************************************************************/
+
+#include <stdio.h>
+#define MaxVertexNum 100
+#define QueueSize 30
+typedef enum{ FALSE, TRUE }Boolean;
+Boolean visited[MaxVertexNum];
+typedef char VertexType;
+typedef int EdgeType;
+
+typedef struct node     //边表结点
+{
+    int adjvex;         //邻接点域
+    struct node *next;  //域链
+    //若是要表示边上的权,则应增加一个数据域
+}EdgeNode;
+
+typedef struct vnode    //顶点边结点
+{
+    VertexType vertex;  //顶点域
+    EdgeNode *firstedge;//边表头指针
+}VertexNode;
+
+typedef VertexNode AdjList[MaxVertexNum];   //AdjList是邻接表类型
+typedef struct
+{
+    AdjList adjlist;    //邻接表
+    int n, e;
+}ALGraph;
+
+/************************************************************************/
+/* 建立无向图的邻接表算法                                               */
+/************************************************************************/
+void CreateALGraph(ALGraph *G)
+{/*建立有向图的邻接表存储*/
+
+    G->n = 3;
+    G->e = 2;
+
+    G->adjlist[0].vertex = 'a';
+    G->adjlist[1].vertex = 'b';
+    G->adjlist[2].vertex = 'c';
+
+    for (int i = 0; i < G->n; i++)
+        G->adjlist[i].firstedge = NULL;
+
+    EdgeNode* s = new EdgeNode; /*生成新边表结点s*/
+    s->adjvex = 1;
+    s->next = G->adjlist[0].firstedge;
+    G->adjlist[0].firstedge = s;
+
+     s = new EdgeNode;
+    s->adjvex = 2;
+    s->next = G->adjlist[0].firstedge;
+    G->adjlist[0].firstedge = s;
+
+}/*CreateALGraph*/
+
+/************************************************************************/
+/* 深度优先遍历                                                         */
+/************************************************************************/
+void DFS(ALGraph *G, int i)
+{
+    //以vi为出发点对邻接表表示的图G进行深度优先搜索
+    EdgeNode *p;
+    printf("visit vertex:%c\n", G->adjlist[i].vertex);  // 访问顶点vi
+    visited[i] = TRUE;              //标记vi已访问
+    p = G->adjlist[i].firstedge;        //取vi边表的头指针
+    while (p)
+    {                               //依次搜索vi的邻接点vj，这里j=p->adjvex
+        if (!visited[p->adjvex])    //若vi尚未被访问
+            DFS(G, p->adjvex);      //则以Vj为出发点向纵深搜索
+        p = p->next;                     //找vi的下一邻接点
+    }
+}
+void DFSTraverseM(ALGraph *G)
+{
+    int i;
+    for (i = 0; i < G->n; i++)
+        visited[i] = FALSE;
+    for (i = 0; i < G->n; i++)
+    if (!visited[i])
+        DFS(G, i);
+}
+/************************************************************************/
+/* 广度优先遍历                                                         */
+/************************************************************************/
+typedef struct
+{
+    int front;
+    int rear;
+    int count;
+    int data[QueueSize];
+}CirQueue;
+void InitQueue(CirQueue *Q)
+{
+    Q->front = Q->rear = 0;
+    Q->count = 0;
+}
+int QueueEmpty(CirQueue *Q)
+{
+    return Q->count == 0;
+}
+int QueueFull(CirQueue *Q)
+{
+    return Q->count == QueueSize;
+}
+void EnQueue(CirQueue *Q, int x)
+{
+    if (QueueFull(Q))
+        printf("Queue overflow");
+    else
+    {
+        Q->count++;
+        Q->data[Q->rear] = x;
+        Q->rear = (Q->rear + 1) % QueueSize;
+    }
+}
+int DeQueue(CirQueue *Q)
+{
+    int temp;
+    if (QueueEmpty(Q))
+    {
+        printf("Queue underflow");
+        return NULL;
+    }
+    else
+    {
+        temp = Q->data[Q->front];
+        Q->count--;
+        Q->front = (Q->front + 1) % QueueSize;
+        return temp;
+    }
+}
+void BFS(ALGraph*G, int k)
+{   // 以vk为源点对用邻接表表示的图G进行广度优先搜索
+    int i;
+    CirQueue Q;             //须将队列定义中DataType改为int
+    EdgeNode *p;
+    InitQueue(&Q);          //队列初始化
+    printf("visit vertex:%c\n", G->adjlist[k].vertex);      //访问源点vk
+    visited[k] = TRUE;
+    EnQueue(&Q, k);         //vk已访问，将其人队。（实际上是将其序号人队）
+    while (!QueueEmpty(&Q))
+    {                                   //队非空则执行
+        i = DeQueue(&Q);                    //相当于vi出队
+        p = G->adjlist[i].firstedge;        //取vi的边表头指针
+        while (p)
+        {                               //依次搜索vi的邻接点vj(令p->adjvex=j)
+            if (!visited[p->adjvex])
+            {                           //若vj未访问过
+                printf("visit vertex:%c\n", G->adjlist[p->adjvex].vertex);      //访问vj
+                visited[p->adjvex] = TRUE;
+                EnQueue(&Q, p->adjvex); //访问过的vj人队
+            }
+            p = p->next;                    //找vi的下一邻接点
+        }
+    }
+}
+void BFSTraverseM(ALGraph *G)
+{
+    int i;
+    for (i = 0; i < G->n; i++)
+        visited[i] = FALSE;
+    for (i = 0; i < G->n; i++)
+    if (!visited[i])
+        BFS(G, i);
+}
+/************************************************************************/
+/* 打印邻接表                                                     */
+/************************************************************************/
+void PrintfGraphAL(ALGraph *G)
+{
+    for (int i = 0; i < G->n; i++){
+        EdgeNode* e = G->adjlist[i].firstedge;
+        while (e != NULL){
+            printf("%c ", G->adjlist[e->adjvex]);
+            e = e->next;
+        }
+        printf("\n");
+    }
+
+}
+/************************************************************************/
+/* 删除邻接表                                                     */
+/************************************************************************/
+void DeleteGraphAL(ALGraph *G)
+{
+    for (int i = 0; i < G->n; i++)
+    {
+        EdgeNode *q;
+        EdgeNode *p = G->adjlist[i].firstedge;
+        while (p)
+        {
+            q = p;
+            p = p->next;
+            delete q;
+        }
+        G->adjlist[i].firstedge = NULL;
+    }
+}
+/************************************************************************/
+/* 主函数调用                                                           */
+/************************************************************************/
+int main()
+{
+
+    ALGraph G;
+    CreateALGraph(&G);
+    printf("深度优先遍历：\n");
+    DFSTraverseM(&G);
+    printf("广度优先遍历：\n");
+    BFSTraverseM(&G);
+    printf("邻接表：\n");
+    PrintfGraphAL(&G);
+
+    DeleteGraphAL(&G);
+    getchar();
+    getchar();
+    return 0;
+}
+
++++++++++++++++++++++++++++++++++++&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+#include <stdio.h>
+#define VertexType char
+#define MAXNODENUM 100
+bool visited[ MAXNODENUM];
+typedef struct enode{
+                 int vNum ;
+                 struct enode * next ;
+} EdgeNode;
+
+typedef struct vnode{
+                 VertexType vName ;
+                 EdgeNode * firstlink;
+} VertexNode;
+
+typedef VertexNode list[MAXNODENUM ];
+
+typedef struct graph{
+                 list list ;
+                 int n , e ;
+} ALGraph;
+
+void Create( ALGraph * G){
+                 G->n = 4;
+
+                 G->list [0]. vName = 'a';
+                 G->list [1]. vName = 'b';
+                 G->list [2]. vName = 'c';
+                 G->list [3]. vName = 'd';
+
+                 for ( int i = 0; i < G-> n; i++){
+                                 G->list [i]. firstlink = NULL;
+                 }
+
+                 EdgeNode * e1 = new EdgeNode;
+                 e1->vNum = 1;
+                 e1->next = NULL;
+                 G->list [1]. firstlink = e1;
+
+                 e1 = new EdgeNode;
+                 e1->vNum = 2;
+                 e1->next = NULL;
+                 G->list [0]. firstlink = e1;
+
+}
+
+void DFS( ALGraph * G, int i ){
+                 printf("visit:%c\n" ,G-> list[i ].vName);
+                 visited[i ] = true;
+                 EdgeNode * p = G ->list[ i].firstlink ;
+                 while ( p){
+                                 if (! visited[p ->vNum])
+                                                 DFS(G , p ->vNum);
+                                 p = p-> next;
+                 }
+}
+
+void DFSTravel( ALGraph * G){
+                 for ( int i = 0; i < G-> n;i ++)
+                                 visited[i ] = false;
+                 for ( int i = 0; i < G-> n; i++)
+                 if (! visited[i ])DFS( G,i );
+
+}
+
+void PrintfGraphAL( ALGraph * G)
+{
+                 for ( int i = 0; i < G-> n; i++){
+                                 EdgeNode* e = G-> list[i ].firstlink;
+                                 while ( e){
+                                                 printf("%c " , G ->list[ e->vNum ]);
+                                                 e = e-> next;
+                                 }
+                                 printf("\n" );
+                 }
+
+}
+
+int main(){
+
+                 ALGraph G ;
+                 Create(&G );
+                 PrintfGraphAL(&G );
+                 DFSTravel(&G );
+                 getchar();
+                 return 0 ;
+}
+
+
+

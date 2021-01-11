@@ -1,0 +1,92 @@
+    
+   http://www.cplusplus.com/doc/tutorial/files/
+
+        ofstream	ios::out
+        ifstream	ios::in
+        fstream	ios::in | ios::out
+
+        we should include fstream
+        ofstream means :: out file stream 
+        in file stream 
+         
+        use getline (filehandle , string buffer ) to read line 
+        so , declear a string var before reading files 
+
+tested in env:://////////////////////////////////////////////////////////
+
+#include <iostream>
+#include <fstream>
+#include <string>
+using namespace std;
+
+int main () {
+   string line;
+   string line_from_output;
+   bool isequal=true;
+   int linenum=0;
+   ifstream standerdfile ("..\\data\\standerd_output.txt");
+   ifstream myfile ("..\\data\\output.txt");
+   while ( getline (myfile,line_from_output) )
+   {
+         getline (standerdfile,line);
+         linenum++;
+         if(line_from_output.compare(line)!=0){
+            isequal=false;
+            break;
+         }
+   }
+   ofstream report ("..\\data\\result.txt");
+   if(isequal)
+      report<<"they are equal txts\n";
+   else 
+      report<<"not equal, at line:"<< linenum <<'\n';
+
+   report.close();
+   standerdfile.close();
+   myfile.close();
+   return 0;
+}
+
+used in practice:://////////////////////////////////////////////////////////
+
+#include <iostream>
+#include <fstream>
+#include <string>
+using namespace std;
+
+int main () {
+   string line;
+   string line_from_output;
+   bool isequal=true;
+   int linenum=0;
+   ifstream standerdfile ("standerd_output.txt");
+   ifstream myfile ("output.txt");
+   while ( getline (myfile,line_from_output) )
+   {
+         getline (standerdfile,line);
+         linenum++;
+         if(line_from_output.compare(line)!=0){
+            isequal=false;
+            break;
+         }
+   }
+   //ofstream report ("result.txt");
+   if(isequal)
+      //report<<"they are equal txts\n";
+      cout<<"they are equal txts" <<endl;
+   else 
+      //report<<"not equal, at line:"<< linenum <<'\n';
+      cout<<"not equal, at line:"<< linenum <<endl;
+
+   //report.close();
+   standerdfile.close();
+   myfile.close();
+
+   int n;
+   cin>>n;
+   return 0;
+}
+
+
+
+

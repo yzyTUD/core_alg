@@ -1,0 +1,57 @@
+
+import java.awt.AWTException;
+import java.awt.Dimension;
+import java.awt.MouseInfo;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.Robot;
+import java.awt.Toolkit;
+import java.awt.event.InputEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+
+public class javaRobot {
+public static void main(String[] args) throws IOException, InterruptedException {
+
+    try {
+    Robot robot = new Robot();
+//     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+//     BufferedImage image = robot.createScreenCapture(new Rectangle(0, 0, screenSize.width,screenSize.height));
+//     ImageIO.write(image, "png", new File("/Users/mac/Documents/workspace/Exam/src/example.png"));
+
+
+    long timemill = System.currentTimeMillis();
+
+
+
+    while(System.currentTimeMillis()-timemill<10*1000){
+
+    Point mousepoint= MouseInfo.getPointerInfo().getLocation();
+    int x = mousepoint.x;
+    int y = mousepoint.y;
+    System.out.println("("+x+","+y+")");
+    robot.mouseMove(x-80, y);
+     Thread.sleep(2000);
+
+
+    mousepoint= MouseInfo.getPointerInfo().getLocation();
+       x = mousepoint.x;
+       y = mousepoint.y;
+     // robot.mousePress(InputEvent.BUTTON2_MASK);
+    System.out.println("("+x+","+y+")");
+    robot.mouseMove(x+80, y);
+     Thread.sleep(2000);
+
+    }
+
+    } catch (AWTException e) {
+        //抛出此异常表示平台配置不允许使用低级输入控件,即不支持Robot类
+        e.printStackTrace();
+    }
+
+}
+}
+

@@ -1,0 +1,50 @@
+# -*- coding: utf-8 -*-
+
+
+import wx
+
+from email import Message
+class MainWindow(wx.Frame):#继承Frame
+    def __init__(self, parent, title):
+        wx.Frame.__init__(self, parent, title = title, size = (600  , 400))
+        self.Centre()
+        #创建面板
+        panel=wx.Panel(self)
+        #创建按钮
+        button = wx.Button(panel,label="Click me",pos=(10,10))
+        button.Bind(wx.EVT_BUTTON, self.OnQuit)
+        
+        openFileDlgBtn = wx.Button(panel, label="Show OPEN FileDialog",pos=(10,50))
+        openFileDlgBtn.Bind(wx.EVT_BUTTON, self.onOpenFile)
+        
+        tDlgBtn = wx.Button(panel, label="Show Input Field",pos=(10,90))
+        tDlgBtn.Bind(wx.EVT_BUTTON, self.ontDlgBtn)
+        
+       
+    #事件对应方法
+    def OnQuit(self,e):
+        self.Close()
+    def onOpenFile(self, event):
+        dlg = wx.FileDialog(
+            self, message="Choose a file",
+            defaultDir="C:/", 
+            style=wx.FD_OPEN | wx.FD_MULTIPLE | wx.FD_CHANGE_DIR
+            )
+        dlg.ShowModal()
+        paths = dlg.GetPaths()
+        print "You have chosen the following file(s):"
+        print paths
+        for path in paths:
+            print path
+        dlg.Destroy()
+    def ontDlgBtn(self,e):
+        tdlg = wx.TextEntryDialog(self,message="please input")
+        tdlg.ShowModal()
+        result = tdlg.GetValue()
+        tdlg.Destroy()
+        
+        
+app = wx.App(False)
+window = MainWindow(None, 'MainWindow')
+window.Show(True)
+app.MainLoop()

@@ -1,0 +1,22 @@
+
+clear
+clc
+i=1;
+a=[6 2 1 -2;2 5 0 -2;-2 0 8 5;1 3 2 7];
+d=diag(diag(a));
+l=d-tril(a);
+u=d-triu(a);
+d0=inv(d);
+b=[4;7;-1;0];
+x0=zeros(4,1);
+B=inv(d-l)*u;
+f=inv(d-l)*b;
+x=B*x0+f;
+while norm(x-x0,inf)>=1e-6
+    x0=x;
+    x=B*x0+f;
+    i=i+1;
+    i
+end
+x
+

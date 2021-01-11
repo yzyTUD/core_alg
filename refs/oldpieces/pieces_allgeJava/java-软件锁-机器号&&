@@ -1,0 +1,82 @@
+package GUI;
+
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+import util.Conn;
+import util.sicherHeit;
+
+public class Login {
+	JFrame jf = new JFrame("显示"); //创建一个窗口
+    JPanel jp = new JPanel(); //创建
+    JButton jb = new JButton("登陆（自动注册）");
+    
+    public void testSerialnumDB(){
+    	new Conn() ;
+    	ResultSet rs=Conn.executeQuery("SELECT * FROM serialInfo");
+    	
+   		try {
+   			int count=0;
+			while(rs.next()){
+				count++;
+			}
+			if(count<3){//还可以注册
+				try {
+					String sqlstr="INSERT INTO serialInfo (n1) VALUES ('"+sicherHeit.getSerial()+"')";
+					Conn.executeUpdate(sqlstr);
+					
+					new LocalBrowser();
+				} catch (IOException e) {}
+				
+			}else if(count==3||count>3){//不可以注册，检查登陆
+				new Conn() ;
+		    	rs=Conn.executeQuery("SELECT * FROM serialInfo");
+		    	
+		    	boolean CanSein=false;
+		    	while(rs.next()){
+		    		try {
+						if(sicherHeit.getSerial().equals(rs.getString("n1"))){
+							new LocalBrowser();
+							CanSein=true;
+						}
+					} catch (IOException e) {}
+		    	}
+		    	if(CanSein==false){
+		    		new Leid();
+		    	}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    
+    public Login(){
+    	
+    	jb.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent arg0) {
+				testSerialnumDB();
+		}});
+    	
+    	
+    	jp.add(jb);
+    	jf.add(jp);
+    	jf.setSize(400, 330);
+    	jf.setLocation(300,200);
+    	jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);//关闭
+        jf.setVisible(true); //解决了初始不可见的问题
+    }
+    public static void main(String[] args) {
+		new Login();
+	}
+    
+    
+}

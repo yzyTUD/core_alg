@@ -1,0 +1,18 @@
+
+import time
+import urllib2,urllib
+opener = urllib2.build_opener()
+opener.addheaders.append(('Cookie', 'ACCOUNT=2013001401220313024937'))#Nur
+# f = opener.open("http://jwxt.sdu.edu.cn:7890/pls/wwwbks/xk.CourseInput?jym2005=14564.114622243536")
+# # print f.read()
+
+data = {"p_qxrxk" : "0133300810","p_qxrxk_kxh":"100"}
+request = urllib2.Request(
+        url     = 'http://jwxt.sdu.edu.cn:7890/pls/wwwbks/xk.CourseInput?jym2005=14564.114622243536',
+        data    = urllib.urlencode(data)
+)
+while 1:
+    f=opener.open(request)
+    print f.read()
+    time.sleep(1)
+

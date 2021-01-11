@@ -1,0 +1,26 @@
+import urllib2
+
+i=0
+for i in range(293,720,1):
+    url="https://ip89240912.ahcdn.com/key=+zQHUEToCwTHVBWZ+GqBAA,s=,end=1532723033,limit=2/data=1532723033/state=XoZb/reftag=56109644/media=hlsA/ssd2/177/9/72975349.mp4/seg-"+str(i)+"-v1-a1.ts"
+    
+    file_name = url.split('/')[-1]
+    u = urllib2.urlopen(url)
+    f = open("300mium-98/"+file_name, 'wb')
+    meta = u.info()
+    file_size = int(meta.getheaders("Content-Length")[0])
+    print "Downloading: %s Bytes: %s" % (file_name, file_size)
+    
+    file_size_dl = 0
+    block_sz = 8192
+    while True:
+        buffer = u.read(block_sz)
+        if not buffer:
+            break
+    
+        file_size_dl += len(buffer)
+        f.write(buffer)
+        status = r"%10d  [%3.2f%%]" % (file_size_dl, file_size_dl * 100. / file_size)
+        status = status + chr(8)*(len(status)+1)
+        print status
+    f.close()

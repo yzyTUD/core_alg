@@ -1,0 +1,34 @@
+package reNew;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
+import org.jsoup.HttpStatusException;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+
+public class DownloadJson {
+	public static  void main(String[] args) throws IOException{  
+		int i=3855;
+		while(true){
+			try {
+				String url="http://www.x-mol.com/xmobile/tutor/getTutor?tutorId="+i;
+			    Document doc=Jsoup.connect(url).ignoreContentType(true).timeout(50000).get();
+			    System.out.println("ok :"+i);
+			    //写入当前一个文件
+			    if(!doc.text().equals("")){
+			    	BufferedWriter fw=new BufferedWriter(new FileWriter(new File("jsons/"+i+".json")));
+				    fw.write(doc.text());
+				    fw.close();
+			    }
+			    i++;
+			} catch (HttpStatusException e) {
+				    System.out.println("Invalid website: page"+i);
+				    i++;
+			}
+			
+		}
+	}
+}

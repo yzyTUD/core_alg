@@ -1,0 +1,34 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>专家信息录入系统</title>
+</head>
+<body>
+专家信息录入系统<br /><br />
+
+<form action="WebBrowser" method="POST" id="usrform">
+(修改数据)所查询的人名:(如果有则列出)<input type="text" name="name">
+<input type="submit" value="调取" /><br /><br /><br />
+
+(插入数据)<br>
+<form action="WebFormInsert" method="POST" id="usrform">
+			人名(主键)：<br /><textarea rows="1" cols="50" name="n1" form="usrform">${usr.n1}</textarea><br />
+			领域：<br /><textarea rows="1" cols="50" name="n2" form="usrform">${usr.n2}</textarea><br />
+			单位：<br /><textarea rows="4" cols="50" name="n3" form="usrform">${usr.n3}</textarea><br />
+			职务：<br /><textarea rows="4" cols="50" name="n4" form="usrform">${usr.n4}</textarea><br />
+			联系方式：<br /><textarea rows="1" cols="50" name="n5" form="usrform">${usr.n5}</textarea><br />
+			<br />
+			中文简介：<br /><textarea rows="4" cols="50" name="n6" form="usrform">${usr.n6}</textarea><br />
+			英文简介：<br /><textarea rows="4" cols="50" name="n7" form="usrform">${usr.n7}</textarea><br />
+			德语简介：<br /><textarea rows="4" cols="50" name="n8" form="usrform">${usr.n8}</textarea><br />
+			俄语简介：<br /><textarea rows="4" cols="50" name="n9" form="usrform">${usr.n9}</textarea><br />
+			<input type="submit" value="插入/覆盖" /><br /><br /><br />
+</form>
+
+
+<a href="/testWeb/WebBrowser">查看全部</a>
+</body>
+</html>

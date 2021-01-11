@@ -1,0 +1,8 @@
+//read pixel 
+    int intensity;
+    for (int i = 0; i < srcImg.cols ; i++) {
+        for (int j = 0; j < srcImg.rows; j++) {
+            intensity = srcImg.at<uchar>(i, j);
+            printf(" %d ", intensity);
+        }printf("\n");
+    }

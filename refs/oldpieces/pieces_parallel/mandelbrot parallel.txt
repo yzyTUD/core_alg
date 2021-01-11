@@ -1,0 +1,115 @@
+#include <complex>
+#include <iostream>
+#include <sstream>
+#include <assert.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <pthread.h>
+#include <sys/sysinfo.h>
+
+using namespace std;
+
+struct thread_work_t{
+    long unsigned start_n;
+    long unsigned end_n;
+	char* matAsArray;
+};
+
+int max_row, max_column, max_n;
+
+
+void *calcu(void *thread_work_uncasted){
+	//in each thread , get para.
+	struct thread_work_t *thread_work = (struct thread_work_t*)thread_work_uncasted;
+    const long unsigned int start_n = thread_work->start_n;
+    const long unsigned int end_n = thread_work->end_n;
+	char* matAsArray = thread_work->matAsArray;
+
+	for(int i=start_n;i<end_n;i++){
+		int r=i/max_column;
+		int c=i%max_column;
+		complex<float> z;
+		int n = 0;
+		while(abs(z) < 2 && ++n < max_n)
+			z = pow(z, 2) + decltype(z)(
+				(float)c * 2 / max_column - 1.5,
+				(float)r * 2 / max_row - 1
+			);
+		matAsArray[i]=(n == max_n ? '#' : '.');
+	}
+}
+
+int main(){
+	// Determine the amount of available CPUs
+    int cpus = get_nprocs();
+    // nprocs() might return wrong amount inside of a container.
+    // Use MAX_CPUS instead, if available.
+    if (getenv("MAX_CPUS")) {
+        cpus = atoi(getenv("MAX_CPUS"));
+    }
+    // Sanity-check
+    // assert(cpus > 0 && cpus <= 64);
+    fprintf(stderr, "Running on %d CPUs\n", cpus);
+
+
+	
+	// cin >> max_row;
+	// cin >> max_column;
+	// cin >> max_n;
+	max_row=100;
+	max_column=100;
+	max_n=20;
+
+	// melloc data
+	//char **mat = (char**)malloc(sizeof(char*)*max_row);
+	//for (int i=0; i<max_row;i++)
+		//mat[i]=(char*)malloc(sizeof(char)*max_column);
+	char* matAsArray=(char*)malloc(sizeof(char)*max_column*max_row);
+	int n=max_column*max_row;
+	/*
+		prepare. parallel data , core part
+	*/ 
+	struct thread_work_t tw[cpus];
+    pthread_t thread[cpus];
+	// mat , start , stop , some add. para.
+	//calcu(matAsArray,0,3*max_column,max_n,max_column,max_row);
+	//calcu(matAsArray,10*max_column,30*max_column,max_n,max_column,max_row);
+
+	///////////////////////////////threads start//////////////////////////////
+	for (int i=0; i < cpus; i++) {
+        tw[i].matAsArray  = matAsArray;
+        tw[i].start_n = (n/cpus)* i;
+        tw[i].end_n   = (n/cpus)*(i+1);
+
+        fprintf(stderr, "Starting thread %d from %ld to %ld\n", 
+			i, tw[i].start_n, tw[i].end_n);
+    
+        pthread_create(&thread[i], NULL, calcu, (void*)&tw[i]);
+    }
+
+    // main thread takes care of the leftover
+    struct thread_work_t maintw;
+    //long unsigned int mdigits[d+11] = {0};
+    maintw.matAsArray  = matAsArray;
+    maintw.start_n = (n/cpus) * cpus ;
+    maintw.end_n   = n + 1;
+
+    calcu((void*)&maintw);
+
+	for (int i=0; i<cpus; i++) {
+        // wait for all threads
+        pthread_join(thread[i], NULL);
+    }
+
+	//calcu(matAsArray,10*max_column,30*max_column+10);
+
+	//////////////////////////////////threads end//////////////////////////////
+
+	for(int r = 0; r < max_row; ++r){
+		for(int c = 0; c < max_column; ++c)
+			std::cout << matAsArray[r*max_column+c];
+		cout << '\n';
+	}	
+}
+
+

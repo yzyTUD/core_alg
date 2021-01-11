@@ -1,0 +1,36 @@
+# -*- coding: utf-8 -*-
+#参考http://www.blog.pythonlibrary.org/2010/06/26/the-dialogs-of-wxpython-part-1-of-2/
+
+import wx
+class MainWindow(wx.Frame):#继承Frame
+    def __init__(self, parent, title):
+        wx.Frame.__init__(self, parent, title = title, size = (600  , 400))
+        self.Centre()
+
+        panel=wx.Panel(self)
+        button = wx.Button(panel,label="Click me",pos=(10,10))
+        button.Bind(wx.EVT_BUTTON, self.OnQuit)
+        
+        openFileDlgBtn = wx.Button(panel, label="Show OPEN FileDialog",pos=(10,50))
+        openFileDlgBtn.Bind(wx.EVT_BUTTON, self.onOpenFile)
+    #自己随意创建，退出方法
+    def OnQuit(self,e):
+        self.Close()
+    def onOpenFile(self, event):
+        dlg = wx.FileDialog(
+            self, message="Choose a file",
+            defaultDir="C:/", 
+            style=wx.FD_OPEN | wx.FD_MULTIPLE | wx.FD_CHANGE_DIR
+            )
+        dlg.ShowModal()
+        paths = dlg.GetPaths()
+        print "You have chosen the following file(s):"
+        print paths
+        for path in paths:
+            print path
+        dlg.Destroy()
+        
+app = wx.App(False)
+window = MainWindow(None, 'MainWindow')
+window.Show(True)
+app.MainLoop()

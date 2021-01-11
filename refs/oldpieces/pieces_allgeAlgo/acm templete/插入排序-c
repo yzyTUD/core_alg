@@ -1,0 +1,34 @@
+#include <stdio.h>
+
+
+void Insert(int a[],int num){
+    int max=0;
+    int i,j;
+    for(j=0;j<num;j++){
+        max=j;
+        for(i=j+1;i<num;i++){
+            if(a[i]>a[max])
+                max=i;
+        }
+        if(max!=j){
+        int temp=a[j];
+        a[j]=a[max];
+        a[max]=temp;
+        }
+    }
+}
+
+
+int main(){
+     int num=5;
+     int a[num],i=0;
+     printf("Please Input Numbers:\n");
+     for( i=0;i<num;i++)
+         scanf("%d",&a[i]);
+
+     Insert(a,num);
+
+     for( i=0;i<num;i++)
+         printf("%d ",a[i]);
+     return 0;
+}

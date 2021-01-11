@@ -1,0 +1,73 @@
+/*
+ * 环境：VC6.0,Console Application
+ * 原理：π=2+1/3*(2+2/5*(2+3/7*(2+...
+ * 特点：内嵌汇编提速并扩大了计算范围
+ * 限制：位数ws原则上没有限制但因为本
+ * 算法的时间正比于ws的平方所以将位数
+ * 控制在二、三十万以内较好。本人曾用
+ * 奔Ⅳ2.6GHz算20万位，耗时10分钟左右
+ */
+#include <stdio.h>
+#include <stdlib.h>
+#include <malloc.h>
+#include <time.h>
+long a = 100000L;
+void main()
+{
+	FILE		*fp;
+	long		t1, t2;
+	char		filename[40];
+	unsigned long	c, d, e, i, j, ws;
+	unsigned long	*f, *bb;
+	printf( "位数=?" );
+	scanf( "%ld", &ws );
+	if ( ws < 1 )
+		return;
+	c	= (ws + 4) / 05 * 17;
+	bb	= f = (long *) malloc( 04 * c );
+	if ( f == NULL )
+		abort();
+	printf( "将Pi存为: " );            /* 提示输入数据文件名 */
+	scanf( "%s", filename );        /* 若打入NUL,则不存盘 */
+	fp = fopen( filename, "w" );
+	if ( fp == NULL )
+		abort();
+	t1 = time( NULL );
+	for ( i = 0; i < c - 1; i++, bb++ )
+		*bb = a / 5;
+	*bb = a / 5;                    /* 这里并不错 */
+	for ( e = 0; c; c -= 17, bb -= 17, e = d % a )
+	{
+		static long group;
+		d	= 0; i = c;
+		j	= c + c - 1;
+		_asm mov eDI, bb
+loopi:
+		_asm mov eax, [eDI]
+		_asm mul Dword ptr a
+		_asm mov ecx, edx
+		_asm mov ebx, eax
+		_asm mov eax, d
+		_asm mul dword ptr i
+		_asm add eax, ebx
+		_asm adc edx, ecx
+		_asm div dword ptr j
+		_asm mov d, eax
+		_asm mov [eDI], edx
+		_asm sub eDI, 04
+		_asm dec dword ptr j
+		_asm dec dword ptr j
+		_asm dec dword ptr i
+		_asm jnz loopi
+			 e += d / a;                    /* 这是为了避免重复计算 */
+		if ( e >= 100000 )                      /* 这是一种糟糕情况 */
+			abort();                        /*希望它最好不要发生 */
+		if ( ++group % 200 == 0 )               /* 逢千位附近 */
+			printf( "%05lu\t", e );         /* 显示五位 */
+		fprintf( fp, "%05lu", e );              /* 写入磁盘 */
+	}
+	t2 = time( NULL );
+	printf( "%ld秒\n", t2 - t1 );
+	free( f );
+	fclose( fp );
+}

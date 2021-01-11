@@ -1,0 +1,44 @@
+目的
+    保护硬件软件数据
+
+
+刷面试题|证书考试
+网络安全证书
+
+    CIW 470 证书  三门课 偏重于理论 安全理论提升
+        需要：CCNA  思科证书 或者 MCSE 
+    CISSP  分成10块 更加深入
+
+
+凯文.米特尼克 
+Kevin David Mitnick
+下村勉
+
+汉王公司2002-9-17
+
+
+概述：：：：
+物理层：
+    网络层：ttl  128 每经过一个减一   mac层ip层tcp
+    物理层搭线窃听 数据标签数据填充
+
+    arp -a命令   ip与mac对应  ping以后自动添加
+
+
+传输层：
+    半连接 SYN FLOOD
+
+
+应用层：
+    之名端口《1024
+    常用：21 ftp
+           22 ssa
+           23 telnet
+           80 http
+
+
+tcp  rfc 793
+
+dos 命令：attrib -r ffd.exe 去掉只读属性
+
+dos命令邮箱发送匿名信件smtp。telnet和ssh（ssh加密而且可以管理员登陆）

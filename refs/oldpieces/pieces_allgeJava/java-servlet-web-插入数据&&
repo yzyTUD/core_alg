@@ -1,0 +1,98 @@
+package WebGUI;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import util.Conn;
+
+/**
+ * Servlet implementation class HelloForm
+ */
+@WebServlet("/WebFormInsert")
+public class WebFormInsert extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+       
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public WebFormInsert() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+    /**
+     * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+     */
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // 设置响应内容类型
+        response.setContentType("text/html;charset=utf-8");
+
+        PrintWriter out = response.getWriter();
+        String title = "数据已插入！";
+        // 处理
+        int n10 =0;
+        String n1 = new String(request.getParameter("n1").getBytes("ISO-8859-1"),"utf-8");
+        String n2 = new String(request.getParameter("n2").getBytes("ISO-8859-1"),"utf-8");
+        String n3 = new String(request.getParameter("n3").getBytes("ISO-8859-1"),"utf-8");
+        String n4 = new String(request.getParameter("n4").getBytes("ISO-8859-1"),"utf-8");
+        String n5 = new String(request.getParameter("n5").getBytes("ISO-8859-1"),"utf-8");
+        
+        String n6 = new String(request.getParameter("n6").getBytes("ISO-8859-1"),"utf-8");
+        String n7 = new String(request.getParameter("n7").getBytes("ISO-8859-1"),"utf-8");
+        String n8 = new String(request.getParameter("n8").getBytes("ISO-8859-1"),"utf-8");
+        String n9 = new String(request.getParameter("n9").getBytes("ISO-8859-1"),"utf-8");
+        
+        char[] tmpn7=new char[n7.length()];
+        for(int i=0;i<n7.length();i++){
+        	if(n7.charAt(i)=='\''){
+        		tmpn7[i]='#';
+        	}else{
+        		tmpn7[i]=n7.charAt(i);
+        	}
+        }
+        
+        String docType = "<!DOCTYPE html> \n";
+        out.println(docType +
+            "<html>\n" +
+            "<head><title>" + title + "</title></head>\n" +
+            "<body bgcolor=\"#f0f0f0\">\n" +
+            "<h1 align=\"center\">" + title + "</h1>\n" +
+            "<ul>\n" +
+            "  <li><b>人名</b>:"+ n1 + "\n" +
+            "  <li><b>中文简介:"+ n6 + "\n" +
+            "<br><br><br><a href='/testWeb/WebBrowser?name="+n1+"'>查看</a>" +
+            "</ul>\n" +
+            "</body></html>");
+        
+        //插入数据
+        new Conn() ;
+        String sqlsyn=
+        		"INSERT INTO expertinfo (n1,n2,n3,n4,n5,n6,n7,n8,n9,n10) VALUES "
+        		+ "('"+n1+"','"+n2+"','"+n3+"',"
+        		+ "	'"+n4+"','"+n5+"','"+n6+"','"+String.valueOf(tmpn7)+"','"+n8+"','"+n9+"',"
+        		+ "'"+n10+"');";
+        String sqlupdate =
+        		"UPDATE expertinfo SET n2='"+n2+"',n3='"+n3+"',n4="
+        		+ "'"+n4+"',n5='"+n5+"',n6='"+n6+"'"
+        		+ ",n7='"+String.valueOf(tmpn7)+"',n8='"+n8+"'"
+        		+ ",n9='"+n9+"',n10='"+n10+"' WHERE n1= '"+n1+"';";
+        if(Conn.executeUpdate(sqlsyn)==1){
+        	
+        }else{
+        	Conn.executeUpdate(sqlupdate);
+        }
+        
+    }
+   
+    
+    // 处理 POST 方法请求的方�?
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        doGet(request, response);
+    }
+}

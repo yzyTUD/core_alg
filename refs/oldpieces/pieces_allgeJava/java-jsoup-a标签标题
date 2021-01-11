@@ -1,0 +1,48 @@
+package reNew;
+
+import java.io.IOException;  
+
+import org.jsoup.*;  
+import org.jsoup.helper.Validate;  
+import org.jsoup.nodes.Document;  
+import org.jsoup.nodes.Element;  
+import org.jsoup.select.Elements;  
+  
+public class LoadFromNet {  
+    public static  void main(String[] args) throws IOException{  
+    /*
+     * **********Conn
+     * */
+//    String url = "http://m.x-mol.com/tutor/detail/7103";  
+//    long start = System.currentTimeMillis();  
+//    Document doc=null;  
+//    try{  
+//        doc = Jsoup.connect(url).timeout(10000).get();  
+//    }  
+//    catch(Exception e){  
+//        e.printStackTrace();  
+//    }  
+//    finally{  
+//        System.out.println("Time is:"+(System.currentTimeMillis()-start) + "ms");  
+//    }  
+    String url="http://www.guit.edu.cn/xwzx/xkyw1.htm";
+    Document doc=Jsoup.connect(url).timeout(50000).get();
+    
+    
+    //**********Muni
+//    Elements elem = doc.getElementsByTag("Title");  
+//    System.out.println("Title is:" +elem.text());  
+    
+    Elements elements=doc.select("div[class=box-list]").select("a[class=news-title]");
+    for (Element el:elements){
+        System.out.println(el.text());
+    }
+   
+//    Elements ele=doc.select("table[class=forumsearchresults]");
+//    for (Element elem:ele) {
+//        String content=elem.text();
+//        //String _content=elem.select("td[onclick~=setPID?]").select("a").text();
+//        System.out.println(content);
+//    }
+    }     
+}  

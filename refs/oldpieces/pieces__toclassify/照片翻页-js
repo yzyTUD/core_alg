@@ -1,0 +1,12 @@
+//get到element  赋值
+
+function showImage(Pic){
+
+    var source = Pic.getAttribute("href");
+    var picture = document.getElementById("pic");
+    picture.setAttribute("src",source);
+
+    var text = Pic.getAttribute("title");
+    var description = document.getElementById("description");
+    description.firstChild.nodeValue = text;
+}

@@ -1,0 +1,15 @@
+#include <windows.h>
+
+int main()
+{
+	MessageBeep(MB_OK);
+	Sleep(1000);
+	MessageBeep(MB_ICONWARNING);
+	Sleep(1000);
+	MessageBeep(MB_ICONSTOP);
+	Sleep(1000);
+	MessageBeep(MB_ICONERROR);
+	Sleep(1000);
+	MessageBeep(MB_ICONEXCLAMATION);
+	return 0;
+}

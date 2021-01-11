@@ -1,0 +1,27 @@
+
+import java.awt.AWTException;
+import java.awt.MouseInfo;
+import java.awt.Robot;
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+class Test{
+    public static void main(String[] args) throws IOException, AWTException, InterruptedException {
+    	Robot rb = new Robot();
+    	
+//    	int screenWidth = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
+//    	int screenHeight = java.awt.Toolkit.getDefaultToolkit().getScreenSize().height;
+//        
+//        rb.setAutoDelay(1000);
+//        
+//        rb.mouseMove(screenWidth/2, screenHeight/2);
+//        rb.mouseMove(500, 100);
+        
+    	for(int i=1;i<20;i++){
+    		rb.mouseMove(MouseInfo.getPointerInfo().getLocation().x+2*i
+    					,MouseInfo.getPointerInfo().getLocation().y);
+    		Thread.sleep(100);
+    	}
+        ///MouseInfo.getPointerInfo().getLocation().x;
+    }
+}

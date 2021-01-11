@@ -1,0 +1,10 @@
+
+    std::unique_ptr是c++11起引入的智能指针，为什么必须要在c++11起才有该特性，
+        主要还是c++11增加了move语义，否则无法对对象的所有权进行传递。
+    std::make_unique是c++14才有的特性
+    无法进行复制构造与赋值操作.
+    另外注意如果你使用vs2008是没有std:move这函数的.vs2010开始才有,是c++ 11标准出现的内容.
+    https://blog.csdn.net/fengbingchun/article/details/52203664
+
+    https://stackoverflow.com/questions/35829647/is-stdunique-ptr-the-wrong-tool-to-allocate-memory-for-an-array
+    

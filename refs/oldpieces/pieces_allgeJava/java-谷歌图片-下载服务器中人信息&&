@@ -1,0 +1,96 @@
+package reNew;
+
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;  
+import java.io.InputStream;
+import java.net.URL;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import org.jsoup.*;  
+import org.jsoup.helper.Validate;  
+import org.jsoup.nodes.Document;  
+import org.jsoup.nodes.Element;  
+import org.jsoup.select.Elements;  
+
+import sun.net.www.URLConnection;
+import util.Conn;
+  
+public class LoadImgFromNet { 
+	public static int[] matchStringByIndexOf( String parent,String child )
+    {
+		int val[]=new int[2];
+        int index1 = 0,index2 = 0;
+        index1 = parent.indexOf(child, index1);
+        index2 = parent.indexOf("\"" , index1);
+        val[0]=index1;
+        val[1]=index2;
+		return val;
+    }
+	
+	public static void downloadNet(String url,String name) throws IOException,FileNotFoundException{
+        // 下载网络文件
+        int bytesum = 0;
+        int byteread = 0;
+            java.net.URLConnection conn =new URL(url).openConnection();
+            InputStream inStream = conn.getInputStream();
+            FileOutputStream fs = new FileOutputStream(name);
+
+            byte[] buffer = new byte[1204];
+            int length;
+            while ((byteread = inStream.read(buffer)) != -1) {
+                bytesum += byteread;
+                fs.write(buffer, 0, byteread);
+            }
+            fs.close();
+    }
+	
+	public static void downloadByName(String name,String sth) throws IOException,FileNotFoundException{
+		
+		String url="https://www.google.com/search?q="+name+sth+"&tbm=isch";
+	    Document doc=Jsoup.connect(url).ignoreContentType(true).timeout(10000).get();
+	    //gan link 
+	    int range = matchStringByIndexOf(doc.text(),"http://")[1]-matchStringByIndexOf(doc.text(),"http://")[0];
+	    char[] picLink = new char[range];
+	    for(int i=matchStringByIndexOf(doc.text(),"http://")[0];i<matchStringByIndexOf(doc.text(),"http://")[1];i++)
+	    	picLink[i-matchStringByIndexOf(doc.text(),"http://")[0]]=doc.text().charAt(i);
+	    System.out.println(name+" :"+String.valueOf(picLink));
+	    downloadNet(String.valueOf(picLink),"mpics/"+name+".jpg");
+	}
+	
+    public static  void main(String[] args) throws  SQLException{  
+    	new Conn() ;
+		ResultSet rs=Conn.executeQuery("SELECT * FROM expertinfo");
+		//to get the count number
+		int count=0;
+   		while(rs.next()){
+   			count++;
+   		}
+   		count=0;
+   		
+   		//do it again
+   		rs=Conn.executeQuery("SELECT * FROM expertinfo");
+   		while(rs.next()&&count<2777){
+   			count++;
+   		}
+		while(rs.next()){
+			try {
+				downloadByName(rs.getString("n1")," filetype:jpg");
+			} catch (IOException e) {
+				try {
+					downloadByName(rs.getString("n1")," edu filetype:jpg");
+				} catch(IOException e1) {
+					System.out.println("error");
+				}
+			}
+			count++;
+		}
+    }     
+}  
+
+
+
+
+
+

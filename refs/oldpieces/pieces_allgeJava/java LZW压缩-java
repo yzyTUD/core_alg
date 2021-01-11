@@ -1,0 +1,306 @@
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+/**
+ * LZW编码程序
+ *
+ * */
+public class LzwCompression {
+
+    private final int BITS;
+    private final int TABLE_SIZE;//表大小
+    private final int HASHING_SHIFT = 4;//哈希的参数
+    private final int MAX_VALUE ;//最大值
+    private final int MAX_CODE ;//最大编码
+
+    private final int EOF = -1;
+
+    private BufferedInputStream input = null;
+    private BufferedOutputStream output = null;
+
+    private int output_bit_count = 0;
+    private int output_bit_buffer = 0;
+
+    private short[] code_value;//码值
+    private short[] prefix_code;//前缀
+    private short[] append_character;//后缀
+
+    public LzwCompression() {//无参数构造方法
+        this(12);
+    }
+
+    public LzwCompression(int bits) {//带参数构造方法
+        BITS = bits;
+        if (BITS <= 12) {
+            TABLE_SIZE = 5021;
+        } else if (BITS == 13) {
+            TABLE_SIZE = 9029;
+        } else
+            TABLE_SIZE = 18041;
+        code_value = new short[TABLE_SIZE];    //代码编码值
+        prefix_code = new short[TABLE_SIZE];    //前缀
+        append_character = new short[TABLE_SIZE];    //后缀
+
+        MAX_VALUE = (1 << BITS) - 1;
+        MAX_CODE = MAX_VALUE - 1;
+    }
+
+    public void compress(InputStream is, OutputStream os) throws IOException {
+        input = new BufferedInputStream(is);
+        output = new BufferedOutputStream(os);
+        short next_code = 0;
+        short character = 0;
+        short string_code = 0;
+        short index = 0;
+
+        next_code = 256;
+
+        for (short i = 0; i < TABLE_SIZE; i++)
+            code_value[i] = -1;
+
+        string_code = (short) input.read();
+
+        while ((character = (short) input.read()) != EOF) {    //一直读到文件末尾
+            index = find_match(string_code, character);
+
+            if (code_value[index] != -1) {
+                string_code = code_value[index];    //如果表中有，即和以前的输入有重复
+            } else {
+                if (next_code <= MAX_CODE) {    //如果是哈希表中没有的词组
+                    code_value[index] = next_code++;
+                    prefix_code[index] = string_code;
+                    append_character[index] = character;
+                }
+
+                output_code(string_code);//输出编码
+                string_code = character;
+            }
+
+        }
+
+        for(int i=0;i<code_value.length;i++){ //在控制台输出码表
+            if(code_value[i]!=-1){
+                System.out.print(i+"\t");
+                System.out.print(prefix_code[i]+"\t");
+                System.out.print((char)append_character[i]+"\t");
+                System.out.print(code_value[i]+"\t");
+                System.out.println();
+            }
+        }
+
+        output_code(string_code);
+        output_code((short) MAX_VALUE);
+        output_code((short) 0);
+
+        output.close();
+        input.close();
+
+    }
+
+    private short find_match(short hash_prefix, short hash_character) {//hash表中搜索
+        int index = 0;
+        int offset = 0;
+
+        index = (hash_character << HASHING_SHIFT) ^ hash_prefix;//hash函数
+
+        if (index == 0)
+            offset = 1;
+        else
+            offset = TABLE_SIZE - index;
+
+        while (true) {
+            if (code_value[index] == -1)
+                return (short) index;
+            if (prefix_code[index] == hash_prefix
+                    && append_character[index] == hash_character)//进行rehashing
+                return (short) index;
+            index -= offset;
+            if (index < 0)
+                index += TABLE_SIZE;
+        }
+    }
+
+    private void output_code(short code) throws IOException{        //输出编码后的文件
+        output_bit_buffer |= code << (32 - BITS - output_bit_count);
+        output_bit_count += BITS;
+        while (output_bit_count >= 8) {
+            output.write(output_bit_buffer >> 24);
+            output_bit_buffer <<= 8;
+            output_bit_count -= 8;
+        }
+    }
+}
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * LZW解码程序
+ *
+ * */
+public class LzwDecompression {
+
+    private  final int BITS; //֧
+    private  final int TABLE_SIZE;
+
+    private  final int MAX_VALUE ;//最大值
+    private  final int MAX_CODE;//最大编码
+
+    private BufferedInputStream input = null;
+    private BufferedOutputStream output = null;
+
+    private int input_bit_count = 0;
+    private int input_bit_buffer = 0;
+
+    private short[] prefix_code ;
+    private short[] append_character;
+
+    List<Short> string = new ArrayList<Short>();
+    List<Short> decode_stack = new ArrayList<Short>();
+    int decode_stack_count = 0;
+
+    public LzwDecompression() {//无参数构造方法
+        this(12);
+    }
+    public LzwDecompression(int bits){
+        BITS=bits;
+        if(BITS<=12){
+            TABLE_SIZE=5021;
+        }else if(BITS==13){
+            TABLE_SIZE=9029;
+        }else
+            TABLE_SIZE=18041;
+        prefix_code = new short[TABLE_SIZE];
+        append_character = new short[TABLE_SIZE];
+        MAX_VALUE = (1 << BITS) - 1;
+        MAX_CODE = MAX_VALUE - 1;
+    }
+    public void expand(InputStream is,OutputStream os) throws IOException {//解码开始
+
+        input = new BufferedInputStream(is);
+        output = new BufferedOutputStream(os);
+
+        short next_code;
+        short new_code;
+        short old_code;
+        short character;
+        int counter;
+
+        next_code = 256; //编码开始的数值
+        counter = 0; //计数器
+        System.out.println("Expanding...");
+
+        old_code = input_code(input);
+        character = old_code;
+        output.write(old_code);
+        while ((new_code = input_code(input)) != MAX_VALUE) {//解码过程
+            if (++counter == 1000)
+            {
+                counter = 0;
+                System.out.printf("*");
+            }
+            string = new ArrayList<Short>();
+            if (new_code >= next_code) {
+                setListValue(decode_stack, decode_stack_count, character);
+                string.add(character);
+                decode_string(decode_stack_count + 1, old_code);
+
+            } else {
+                decode_string(decode_stack_count, new_code);
+            }
+            character = string.get(string.size() - 1);
+            for (int i = string.size() - 1; i >= 0; i--) {
+                output.write(string.get(i));
+            }
+            if (next_code <= MAX_CODE) {
+                prefix_code[next_code] = old_code;
+                append_character[next_code] = character;
+                next_code++;
+            }
+            old_code = new_code;
+        }
+        input.close();
+        output.close();
+    }
+
+    private static void setListValue(List<Short> list, int location, Short value) {
+        if (location >= list.size()) {
+            list.add(value);
+        } else {
+            list.set(location, value);
+        }
+    }
+
+    //解码
+    private void decode_string(int decode_stack_address, short code) {
+        int i;
+        i = 0;
+        decode_stack_count = decode_stack_address;
+        while (code > 255) {
+            setListValue(decode_stack, decode_stack_count,
+                    append_character[code]);
+            decode_stack_count++;
+            string.add(append_character[code]);
+            code = prefix_code[code];
+            if (i++ >= MAX_CODE) {
+                System.out.println("Fatal error during code expansion.");
+                System.exit(-3);
+            }
+        }
+        setListValue(decode_stack, decode_stack_count, code);
+        string.add(code);
+    }
+
+    //读入编码数据
+    private short input_code(BufferedInputStream bis) throws IOException {
+        int return_value;
+
+        while (input_bit_count <= 24) {
+            input_bit_buffer |= bis.read() << (24 - input_bit_count);
+            input_bit_count += 8;
+        }
+        return_value = input_bit_buffer >> (32 - BITS);
+
+        if (return_value < 0)
+            return_value += (MAX_VALUE + 1);
+        input_bit_buffer <<= BITS;
+        input_bit_count -= BITS;
+        return (short) return_value;
+    }
+
+}
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+/**
+ * LZW测试程序
+ *
+ * */
+
+public class TestLzw {
+    public static void main(String[] args) throws FileNotFoundException, IOException {
+        //调用方法开始lzw编码
+        new LzwCompression().compress(
+                new FileInputStream("d:/data/a.txt"),
+                new FileOutputStream("d:/data/a.lzw.txt")//编码后的文件
+        );
+
+        //调用方法开始lzw解码
+        new LzwDecompression().expand(
+                new FileInputStream("d:/data/a.lzw.txt"),
+                new FileOutputStream("d:/data/a.decode.txt")//解码后的文件
+        );
+    }
+}
+

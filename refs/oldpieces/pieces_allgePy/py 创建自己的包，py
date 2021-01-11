@@ -1,0 +1,16 @@
+from mymath import getMax
+print getMax.max(12,2)
+
+
+
+
+__author__='yzy'
+__all__=["getMax"]
+
+
+__author__ = 'bloodchilde'
+def max(a,b):
+if a >= b:
+    return a
+else:
+    return b

@@ -1,0 +1,14 @@
+   
+
+对于java.lang.Runtime应用static 方法  getRuntime()
+而后调用exec()方法，产生动作 
+
+
+import java.io.IOException;
+
+public class FileTest {
+public static void main(String[] args) throws IOException  {
+Runtime.getRuntime().exec("/Applications/StarUML.app/Contents/MacOS/StarUML");
+}
+}
+

@@ -1,0 +1,5 @@
+
+    1.select定位class div a img等标签 交给Elements 对象 
+        "div[class=bd]"
+
+    2.Elements 具有.text() .attr("href")操作

@@ -1,0 +1,273 @@
+/* Stencil application: Sequential, Global, Shared
+ *
+ * author:  Kyle Hannigan
+ * date:    10/02/2009
+ * course:  ICS 499
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <pthread.h>
+#include <omp.h>
+
+#define ARRAY_DIM  100
+#define NUM_THREADS 4
+
+struct arguments {
+    float **array1;
+    float **array2;
+    int id;
+    int nIter;
+};
+
+// function prototypes
+float **makeArray2f(int width, int height);
+void freeArray2f(float **arr, int width);
+bool generateBMP(float **data, char *filePath, int dimension);
+
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+int counter = 0;
+// pthread worker function
+void *doStencil(void *param) {
+    struct arguments *args;
+    int numIter, id;
+    float **arr1;
+    float **arr2;
+    // Get arguments
+    args = (struct arguments*)param;
+    numIter = args->nIter;
+    arr1 = args->array1;
+    arr2 = args->array2;
+    id = args->id;
+
+    // determine subarray indices
+    int lowRow = (id%(NUM_THREADS/2)) * (ARRAY_DIM/(NUM_THREADS/2));
+    int highRow = lowRow + (ARRAY_DIM / (NUM_THREADS/2));
+    int lowCol = (id/(NUM_THREADS/2)) * (ARRAY_DIM/(NUM_THREADS/2));
+    int highCol = lowCol + (ARRAY_DIM/(NUM_THREADS/2));
+    //printf("Thread %d goes rows %d to %d and cols %d to %d\n", id, lowRow, highRow, lowCol, highCol);
+    for(int t = 0; t < numIter; t++) {
+        for(int i = lowRow; i < highRow; i++) {
+            for(int j = lowCol; j < highCol; j++) {
+                // update cell if applicable
+                if(i > 0 && j > 0 && i < ARRAY_DIM-1 && j < ARRAY_DIM-1) {
+                    arr2[i][j] = (float)(0.25*(arr1[i-1][j] + arr1[i+1][j] + arr1[i][j-1] + arr1[i][j+1]));
+                }
+            }
+        }
+        float **temp = arr2;
+        arr2 = arr1;
+        arr1 = temp;
+        pthread_mutex_lock(&lock);
+        // Critical Section
+        // increment counter
+        counter ++;
+        // wait until all threads have finished
+        while(counter < (NUM_THREADS * (t+1))) {
+            pthread_cond_wait(&cond, &lock);
+        }
+        // once all are finished, wake up those that are waiting
+        pthread_cond_broadcast(&cond);
+        // End Critical Section
+        pthread_mutex_unlock(&lock);
+    }
+    return NULL;
+}
+
+int main(int argc, char** argv) {
+    // Get input for number of iterations, default 1
+    int nIter = 1;
+    pthread_t thread[NUM_THREADS];
+    scanf("%d", &nIter);
+    // create arrays to hold data
+    //size_t size = sizeof(float) * ARRAY_DIM * ARRAY_DIM;
+    float** arr1 = makeArray2f(ARRAY_DIM, ARRAY_DIM);
+    float** arr2 = makeArray2f(ARRAY_DIM, ARRAY_DIM);
+
+    // initialize.  initial grid will look like:
+    // 1 1 1 1...
+    // 1 0 0 0...
+    // 1 0 0 0...
+    // 1 0 0 0...
+    for(int i = 0; i < ARRAY_DIM; i++) {
+        for(int j = 0; j < ARRAY_DIM; j++) {
+            if(i == 0 || j == 0)
+                arr2[i][j] = arr1[i][j] = 1; // hot at top and left
+            else
+                arr2[i][j] = arr1[i][j] = 0;
+        }
+    }
+
+    // Do sequential heat transfer, ignores a 1-cell border on all 4 sides
+    for(int t = 0; t < nIter; t++) {
+        for(int i = 1; i < ARRAY_DIM - 1; i++) {
+            for(int j = 1; j < ARRAY_DIM - 1; j++) {
+                arr2[i][j] = (float)(0.25*(arr1[i-1][j] + arr1[i+1][j] + arr1[i][j-1] + arr1[i][j+1]));
+            }
+        }
+        float** temp = arr1;
+        arr1 = arr2;
+        arr2 = temp;
+    }
+
+    /*********************************************
+     *          pthreads heat transfer           *
+     *********************************************/
+    float** ptArr1 = makeArray2f(ARRAY_DIM, ARRAY_DIM);
+    float** ptArr2 = makeArray2f(ARRAY_DIM, ARRAY_DIM);
+
+    // initialize
+    for(int i = 0; i < ARRAY_DIM; i++) {
+        for(int j = 0; j < ARRAY_DIM; j++) {
+            if(i == 0 || j == 0)
+                ptArr2[i][j] = ptArr1[i][j] = 1; // hot at top and left
+            else
+                ptArr2[i][j] = ptArr1[i][j] = 0;
+        }
+    }
+    struct arguments arg[NUM_THREADS];
+    void *returnValue[NUM_THREADS];
+    // create threads
+    for(int i = 0; i < NUM_THREADS; i++) {
+        // set args
+        arg[i].nIter = nIter;
+        arg[i].id = i;
+        arg[i].array1 = ptArr1;
+        arg[i].array2 = ptArr2;
+        pthread_create(&thread[i], NULL, doStencil, (void*)&arg[i]);
+    }
+    // Wait for all threads to complete
+    for(int i = 0; i < NUM_THREADS; i++) {
+        pthread_join(thread[i], &returnValue[i]);
+    }
+
+    /************************
+     * OpenMP Heat Transfer *
+     ************************/
+    float** ompArr1 = makeArray2f(ARRAY_DIM, ARRAY_DIM);
+    float** ompArr2 = makeArray2f(ARRAY_DIM, ARRAY_DIM);
+
+    // initialize
+    for(int i = 0; i < ARRAY_DIM; i++) {
+        for(int j = 0; j < ARRAY_DIM; j++) {
+            if(i == 0 || j == 0)
+                ompArr2[i][j] = ompArr1[i][j] = 1; // hot at top and left
+            else
+                ompArr2[i][j] = ompArr1[i][j] = 0;
+        }
+    }
+    int ompThreadId = 0;
+    int iterations = nIter;
+    int lowRow, lowCol, highRow, highCol;
+    int t;
+    omp_set_num_threads(NUM_THREADS);
+    #pragma omp parallel shared(ompArr1, ompArr2, iterations) private(t, ompThreadId, lowRow, highRow, lowCol, highCol)
+    {
+        ompThreadId = omp_get_thread_num();
+        printf("Thread %d is here\n", ompThreadId);
+        // determine subarray indices
+        lowRow = (ompThreadId%(NUM_THREADS/2)) * (ARRAY_DIM/(NUM_THREADS/2));
+        highRow = lowRow + (ARRAY_DIM / (NUM_THREADS/2));
+        lowCol = (ompThreadId/(NUM_THREADS/2)) * (ARRAY_DIM/(NUM_THREADS/2));
+        highCol = lowCol + (ARRAY_DIM/(NUM_THREADS/2));
+
+        for(t = 0; t < iterations; t++) {
+            for(int i = lowRow; i < highRow; i++) {
+                for(int j = lowCol; j < highCol; j++) {
+                    // update cell if applicable
+                    if(i > 0 && j > 0 && i < ARRAY_DIM-1 && j < ARRAY_DIM-1) {
+                        ompArr2[i][j] = (float)(0.25*(ompArr1[i-1][j] + ompArr1[i+1][j] + ompArr1[i][j-1] + ompArr1[i][j+1]));
+                    }
+                }
+            }
+            float **temp = ompArr2;
+            ompArr2 = ompArr1;
+            ompArr1 = temp;
+            #pragma omp barrier
+        }
+    }
+
+    printf("Done\n");
+    generateBMP(arr1, "sequential.bmp", ARRAY_DIM);
+    generateBMP(ptArr1, "pthread.bmp", ARRAY_DIM);
+    generateBMP(ompArr1, "openmp.bmp", ARRAY_DIM);
+
+    freeArray2f(arr1, ARRAY_DIM);
+    freeArray2f(arr2, ARRAY_DIM);
+    freeArray2f(ptArr1, ARRAY_DIM);
+    freeArray2f(ptArr2, ARRAY_DIM);
+    freeArray2f(ompArr1, ARRAY_DIM);
+    freeArray2f(ompArr2, ARRAY_DIM);
+    return 0;
+}
+
+/*
+ * Allocates a dynamic 2D array of floats
+ */
+float **makeArray2f(int width, int height) {
+    size_t rowSize = sizeof(float) * width;
+    size_t colSize = sizeof(float) * height;
+    float **result = (float**)malloc(rowSize);
+    for(int i = 0; i < width; i++) {
+        result[i] = (float*)malloc(colSize);
+    }
+    return result;
+}
+
+/*
+ * Frees memory from a 2D float array
+ */
+void freeArray2f(float **arr, int width) {
+    for(int i = 0; i < width; i++) {
+        free(arr[i]);
+    }
+    free(arr);
+}
+
+/*
+ * Writes data to a 24-bit BMP file.
+ * assumes input is dim x dim array
+ */
+bool generateBMP(float **data, char *filePath, int dimension) {
+    // Open file.  Overwrites existing file if it exists
+    FILE *bitFile;
+    if(!(bitFile = fopen(filePath, "wb"))) return false;
+    // Write header
+    int rowSize = 4 * ((int)((24 * dimension + 31) / 32));
+    int fileSize = 54 + rowSize * dimension;
+    char hd1[2] = {0x42, 0x4D};     // Magic Numbers
+    short hd2[2] = {0x0, 0x0};      // Application Specific Values
+    int offset = 54;
+    int dibHeaderData1[3] = {40, dimension, dimension}; // header size, width, height
+    short dibHeaderData2[2] = {1, 24};  // color planes, bits/pixel
+    int dibHeaderData3[6] = {0, fileSize - offset, 2835, 2835, 0, 0};
+                            // RGB, size of data, horz. resolution, vert res
+    fwrite(hd1, 1, 2, bitFile);
+    fwrite(&fileSize, 4, 1, bitFile);
+    fwrite(hd2, 2, 2, bitFile);
+    fwrite(&offset, 4, 1, bitFile);
+    fwrite(dibHeaderData1, 4, 3, bitFile);
+    fwrite(dibHeaderData2, 2, 2, bitFile);
+    fwrite(dibHeaderData3, 4, 6, bitFile);
+    // Write pixel data, starts from bottom row
+    // each row should begin at a location in file that is a multiple of 4
+    for(int i = dimension - 1; i >= 0; i--) {
+        for(int j = 0; j < dimension; j++) {
+            // BGR order
+            char color[3] = {(char)(255 * (1 - data[i][j])),
+                            0,
+                            (char)(255 * data[i][j])};
+            fwrite(color, 1, 3, bitFile);
+        }
+        // Check that next row will be at multiple of 4
+        int remainder = (dimension * 3) % 4;
+        if(remainder > 0) {
+            char pad = 0;
+            fwrite(&pad, remainder, 1, bitFile);
+        }
+    }
+    fclose(bitFile);
+    return true;
+}

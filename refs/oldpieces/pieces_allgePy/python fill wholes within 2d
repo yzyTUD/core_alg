@@ -1,0 +1,92 @@
+# -*- coding: utf-8 -*
+import os
+import array
+
+# just a init value
+width = 1024
+height = 1024
+
+# process data file
+array2D = []
+with open("labeled_city_132026833718152502.txt", "r") as f:
+	for line in f.readlines():
+		array2D.append(line.split(' '))
+#print(array2D)
+width = len(array2D) 
+height = len(array2D[0])
+
+
+# index2D = []
+# for i in range(0,width):
+#     for j in range(0,height):
+#         #print(array2D[i][j])
+#         if(float(array2D[i][j])==0):
+#             #print(array2D[i][j])
+#             #print("zero number found!")
+#             index2D.append([i, j])
+# #print(index2D)
+
+#find the indices of the zero numbers
+rows2D = []
+maxrow = len(array2D[0])-10
+maxcolumn = len(array2D[0])-10
+for i in range(10,maxrow):
+		index =[]
+		for j in range(10,maxcolumn):
+			if(float(array2D[i][j])==0):
+				index.append([i,j])
+			if(float(len(index))!=0):              
+				rows2D.append(index)
+ 
+#store the start point of the pairs of start and end point of zero.
+#may be more than one pairs, that happens when there are more than one circle in the same row
+store2D = []
+for i in range(0,len(rows2D)):
+	store = []
+	for j in range(0,len(rows2D[i])-1):
+		#find the start point
+		if(float(rows2D[i][j+1][1]-rows2D[i][j][1])>1):
+			store.append([i,j])
+		if(float(len(store))!=0):
+			store2D.append(store)
+
+'''
+#now chose the odd start point of the pair and fill the points between the start and end using
+#zeros
+print store2D[261][0]
+index12 = rows2D[store2D[261][0][0]][store2D[261][0][1]]
+print index12
+print rows2D[store2D[261][0][0]][store2D[261][0][1]+1]
+'''
+#fill the points
+#extract the odd start point index 
+for i in range(0,len(store2D)):
+	for j in range(0,len(store2D[i])):
+		if(float(j%2)==0):
+			startindex = rows2D[store2D[i][j][0]][store2D[i][j][1]]
+			endindex = rows2D[store2D[i][j][0]][store2D[i][j][1]+1]
+			for z in range(startindex[1],endindex[1]):
+				array2D[startindex[0]][z] = 0
+
+maxval = 255
+# PPM header
+ppm_header = f'P6 {width} {height} {maxval}\n'
+
+# PPM image data (filled with blue)
+# here B means unsigned char
+# set the basic background color 
+image = array.array('B', [0, 0, 0] * width * height)
+
+# change the value , loading the dataset 
+for y in range(0, height-1):
+	for x in range(0, width-1):
+		if(float(array2D[x][y])==0):
+			index = 3 * (y * width + x)
+			image[index] = 255           # red channel
+			image[index + 1] = 0         # green channel
+			image[index + 2] = 0         # blue channel
+	
+# Save the PPM image as a binary file
+with open('blue_example.ppm', 'wb') as f:
+	f.write(bytearray(ppm_header, 'ascii'))
+	image.tofile(f)

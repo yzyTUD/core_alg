@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<head>
+    <title>js</title>
+</head>
+<body>
+    <h4 id="text">Defalt text</h4>
+</body>
+<script type="text/javascript">
+
+    function binSearch(a,dist){
+        var max = a.length-1;
+        var min = 0;
+        while(min<max){
+            var mid = Math.floor((max+min)/2);
+            if(dist==a[mid])
+                return mid;
+            if(dist<a[mid])
+                max = mid;
+            if(dist>a[mid])
+                min = mid;
+        }
+        return false;
+    }
+
+    var arr=[1,2,3,4,6,7,10,11];
+    document.getElementById("text").firstChild.nodeValue = binSearch(arr,10);
+
+</script>
+</html>

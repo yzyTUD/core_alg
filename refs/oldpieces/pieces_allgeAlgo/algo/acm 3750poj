@@ -1,0 +1,50 @@
+/*
+Sample Input
+5
+Xiaoming
+Xiaohua
+Xiaowang
+Zhangsan
+Lisi
+2,3
+
+Sample Output
+Zhangsan
+Xiaohua
+Xiaoming
+Xiaowang
+Lisi
+
+*/
+#include <iostream>
+#include <string>
+using namespace std;
+
+int main()
+{
+    int N = 0, W, S, T_NUM;
+    cin >> N; // pay attention to >> or <<
+    T_NUM = N;
+    string names[N + 1]; // at init , we can give total number
+    char dout;
+
+    for (int i = 1; i < N + 1; i++)
+    {
+        cin >> names[i];
+    }
+    cin >> W >> dout >> S;
+
+    // cout << "W: " << W << " S: " << S << endl;
+    //finish reading numbers
+
+    //## do sm th.
+    cout << names[W] << endl;
+    cout << names[W + S - 1] << endl;
+    names[W + S - 1] = "out";
+
+    cout << names[(W + 2 * S - 1) % T_NUM] << endl;
+
+    //TODO::look into the array to debug 
+
+    return 0;
+}

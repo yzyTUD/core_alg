@@ -1,0 +1,26 @@
+
+#include <iostream>
+using namespace std;
+
+void H(int n, char f, char b, char t)
+{
+    if (n == 0)
+    {
+        return;
+    }
+    if (n == 1)
+    {
+        cout << "Move top from: " << f << " to: " << t << endl;
+    }
+    else
+    {
+        H(n - 1, f, t, b);
+        H(1, f, b, t);
+        H(n - 1, b, f, t);
+    }
+}
+int main()
+{
+    H(2, 'a', 'b', 'c');
+    return 0;
+}
