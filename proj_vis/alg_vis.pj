@@ -1,5 +1,5 @@
 @=
-projectName="core_alg";
+projectName="alg_vis";
 projectType="application";
 projectGUID="CBF0DF03-75E8-45E3-814E-E6FE3268171C";
 addProjectDirs=[CGV_DIR."/plugins", CGV_DIR."/libs", CGV_DIR."/3rd"];
