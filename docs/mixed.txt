@@ -1,11 +1,12 @@
 
 
-    想到什么有趣的算法实现一下
+    有趣的算法实现一下
 		bucket sort 
 		sorting algs
 		diff trees 
 		chessboard 
-
-
-	visual checking 
-	judge checking 
+	checking
+		visual checking 
+		judge checking 
+	编译req
+		代码相对完整解耦，快速，可积累，需要可以debug

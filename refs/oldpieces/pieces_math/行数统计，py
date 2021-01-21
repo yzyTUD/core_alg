@@ -1,7 +1,0 @@
-
-
-f=open("bz2.lib",'r')
-i=0
-while f.readline():
-    i+=1
-print i
